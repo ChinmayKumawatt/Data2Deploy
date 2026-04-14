@@ -4,8 +4,10 @@ from pathlib import Path
 
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from src.utils.logger import logger
+
+from src.utils.config import load_stage_config
 from src.utils.exception import CustomException
+from src.utils.logger import logger
 
 class DataIngestionArtifact:
     def __init__(self, train_file_path, test_file_path, raw_file_path=None):
@@ -175,3 +177,13 @@ class DataIngestion:
         
         except Exception as e:
             raise CustomException(e,sys)
+
+
+def main():
+    config = load_stage_config("ingestion")
+    ingestion = DataIngestion(config=config)
+    ingestion.initiate_data_ingestion()
+
+
+if __name__ == "__main__":
+    main()

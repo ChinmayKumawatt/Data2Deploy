@@ -5,6 +5,7 @@ from pathlib import Path
 import pandas as pd
 from pandas.api.types import is_dtype_equal
 
+from src.utils.config import load_stage_config
 from src.utils.exception import CustomException
 from src.utils.logger import logger
 
@@ -330,3 +331,13 @@ class DataValidation:
         except Exception as e:
             logger.exception("Data validation failed")
             raise CustomException(e, sys)
+
+
+def main():
+    config = load_stage_config("validation")
+    validation = DataValidation(config=config)
+    validation.initiate_data_validation()
+
+
+if __name__ == "__main__":
+    main()

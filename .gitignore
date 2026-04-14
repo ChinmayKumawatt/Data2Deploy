@@ -59,11 +59,12 @@ mlartifacts/
 
 # ==============================
 
-# Data Files (handled by DVC)
+# Data Files
 
 # ==============================
 
 data/
+artifacts/
 *.csv
 *.tsv
 *.xlsx

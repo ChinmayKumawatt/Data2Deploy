@@ -21,6 +21,7 @@ from sklearn.metrics import (
     recall_score,
 )
 
+from src.utils.config import load_stage_config
 from src.utils.common import save_object
 from src.utils.exception import CustomException
 from src.utils.logger import logger
@@ -306,9 +307,14 @@ class ModelTrainer:
         return saved_model_paths
 
     def _save_report(self, ranked_results):
-        model_output_dir = self._resolve_path(getattr(self.config, "model_output_dir", None))
-        self._ensure_directory(model_output_dir)
-        report_path = model_output_dir / "model_training_report.json"
+        report_path_value = getattr(self.config, "report_path", None)
+        if report_path_value:
+            report_path = self._resolve_path(report_path_value)
+            self._ensure_directory(report_path.parent)
+        else:
+            model_output_dir = self._resolve_path(getattr(self.config, "model_output_dir", None))
+            self._ensure_directory(model_output_dir)
+            report_path = model_output_dir / "model_training_report.json"
 
         report_payload = {
             "evaluation_metric": getattr(self.config, "evaluation_metric", None),
@@ -408,3 +414,13 @@ class ModelTrainer:
         except Exception as e:
             logger.exception("Model training failed")
             raise CustomException(e, sys)
+
+
+def main():
+    config = load_stage_config("training")
+    trainer = ModelTrainer(config=config)
+    trainer.initiate_model_training()
+
+
+if __name__ == "__main__":
+    main()

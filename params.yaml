@@ -3,7 +3,7 @@ ingestion:
   target_column: target
   test_size: 0.2
   random_state: 42
-  min_rows: 200
+  min_rows: 100
   task_type: classification
   stratify: true
   raw_path: artifacts/data_ingestion/raw.csv
@@ -15,9 +15,14 @@ validation:
   test_path: artifacts/data_ingestion/test.csv
   target_column: target
   schema:
-    columns: {}
+    columns:
+      sepal length (cm): float64
+      sepal width (cm): float64
+      petal length (cm): float64
+      petal width (cm): float64
+      target: int64
   missing_value_threshold: 0.2
-  drift_threshold: 0.2
+  drift_threshold: 0.5
   imbalance_threshold: 0.9
   report_path: artifacts/data_validation/validation_report.json
 
@@ -26,11 +31,19 @@ transformation:
   test_path: artifacts/data_ingestion/test.csv
   target_column: target
   feature_selection_mode: manual
-  selected_features: []
-  n_features: 10
+  selected_features:
+  - sepal length (cm)
+  - sepal width (cm)
+  - petal length (cm)
+  - petal width (cm)
+  n_features: 4
   feature_selection_method: mutual_info
   task_type: classification
-  numerical_columns: []
+  numerical_columns:
+  - sepal length (cm)
+  - sepal width (cm)
+  - petal length (cm)
+  - petal width (cm)
   categorical_columns: []
   numerical_imputation_strategy: mean
   categorical_imputation_strategy: most_frequent
@@ -48,6 +61,7 @@ training:
   model_list: []
   evaluation_metric: f1
   model_output_dir: models/training
+  report_path: artifacts/model_trainer/model_training_report.json
   random_state: 42
   task_type: classification
 
@@ -58,10 +72,12 @@ tuning:
   models_to_tune: top_k
   top_k: 3
   model_trainer_report_path: artifacts/model_trainer/model_training_report.json
-  n_iter: 10
+  n_iter: 5
   cv: 3
+  n_jobs: 1
   scoring_metric: f1_weighted
   tuner_output_dir: models/tuning
+  report_path: artifacts/model_tuner/model_tuning_report.json
   random_state: 42
   task_type: classification
 
@@ -73,7 +89,10 @@ evaluation:
   evaluator_output_path: models/final/final_model.pkl
   task_type: classification
   baseline_model_paths: []
+  baseline_model_dir: models/training
   tuned_model_paths: []
+  tuned_model_dir: models/tuning
   trainer_report_path: artifacts/model_trainer/model_training_report.json
   tuner_report_path: artifacts/model_tuner/model_tuning_report.json
   overfitting_threshold: 0.1
+  report_path: artifacts/model_evaluator/model_evaluation_report.json

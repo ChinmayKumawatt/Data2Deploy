@@ -8,6 +8,7 @@ from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MinMaxScaler, OneHotEncoder, OrdinalEncoder, StandardScaler
 
+from src.utils.config import load_stage_config
 from src.utils.common import save_object
 from src.utils.exception import CustomException
 from src.utils.logger import logger
@@ -308,10 +309,15 @@ class DataTransformation:
 
         numeric_pipeline = Pipeline(steps=numeric_steps)
 
+        try:
+            categorical_encoder = OneHotEncoder(handle_unknown="ignore", sparse_output=False)
+        except TypeError:
+            categorical_encoder = OneHotEncoder(handle_unknown="ignore", sparse=False)
+
         categorical_pipeline = Pipeline(
             steps=[
                 ("imputer", SimpleImputer(strategy=self._get_categorical_imputer_strategy())),
-                ("encoder", OneHotEncoder(handle_unknown="ignore", sparse=False)),
+                ("encoder", categorical_encoder),
             ]
         )
 
@@ -443,3 +449,13 @@ class DataTransformation:
         except Exception as e:
             logger.exception("Data transformation failed")
             raise CustomException(e, sys)
+
+
+def main():
+    config = load_stage_config("transformation")
+    transformation = DataTransformation(config=config)
+    transformation.initiate_data_transformation()
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,317 @@
+schema: '2.0'
+stages:
+  ingestion:
+    cmd: python -m src.training.components.data_ingestion
+    deps:
+    - path: data/dataset.csv
+      hash: md5
+      md5: 21d441a28bce4417276097df955afc50
+      size: 2928
+    - path: src/training/components/data_ingestion.py
+      hash: md5
+      md5: aa79080c990b8fa3c2c2ce879e43a3df
+      size: 6523
+    params:
+      params.yaml:
+        ingestion.dataset_path: data/dataset.csv
+        ingestion.min_rows: 100
+        ingestion.random_state: 42
+        ingestion.raw_path: artifacts/data_ingestion/raw.csv
+        ingestion.stratify: true
+        ingestion.target_column: target
+        ingestion.task_type: classification
+        ingestion.test_path: artifacts/data_ingestion/test.csv
+        ingestion.test_size: 0.2
+        ingestion.train_path: artifacts/data_ingestion/train.csv
+    outs:
+    - path: artifacts/data_ingestion/raw.csv
+      hash: md5
+      md5: 5ffa5eddc8501a79e589344ed4574b7b
+      size: 2909
+    - path: artifacts/data_ingestion/test.csv
+      hash: md5
+      md5: d4756fc3d8aa3a392a46ad13a7fc95b7
+      size: 648
+    - path: artifacts/data_ingestion/train.csv
+      hash: md5
+      md5: e46dbd27335d08071cb83d083bce3edb
+      size: 2339
+  validation:
+    cmd: python -m src.training.components.data_validation
+    deps:
+    - path: artifacts/data_ingestion/test.csv
+      hash: md5
+      md5: d4756fc3d8aa3a392a46ad13a7fc95b7
+      size: 648
+    - path: artifacts/data_ingestion/train.csv
+      hash: md5
+      md5: e46dbd27335d08071cb83d083bce3edb
+      size: 2339
+    - path: src/training/components/data_validation.py
+      hash: md5
+      md5: ccf3bd0e5363f5ed2d30ee7618d704da
+      size: 13065
+    params:
+      params.yaml:
+        validation.drift_threshold: 0.5
+        validation.imbalance_threshold: 0.9
+        validation.missing_value_threshold: 0.2
+        validation.report_path: artifacts/data_validation/validation_report.json
+        validation.schema:
+          columns:
+            sepal length (cm): float64
+            sepal width (cm): float64
+            petal length (cm): float64
+            petal width (cm): float64
+            target: int64
+        validation.target_column: target
+        validation.test_path: artifacts/data_ingestion/test.csv
+        validation.train_path: artifacts/data_ingestion/train.csv
+    outs:
+    - path: artifacts/data_validation/validation_report.json
+      hash: md5
+      md5: e5b5da0396251fd15bbc30605e068c69
+      size: 3253
+  transformation:
+    cmd: python -m src.training.components.data_transformation
+    deps:
+    - path: artifacts/data_ingestion/test.csv
+      hash: md5
+      md5: d4756fc3d8aa3a392a46ad13a7fc95b7
+      size: 648
+    - path: artifacts/data_ingestion/train.csv
+      hash: md5
+      md5: e46dbd27335d08071cb83d083bce3edb
+      size: 2339
+    - path: src/training/components/data_transformation.py
+      hash: md5
+      md5: 66bf68b1d98e42c5cbb9ede1f16cda2d
+      size: 18219
+    params:
+      params.yaml:
+        transformation.categorical_columns: []
+        transformation.categorical_imputation_strategy: most_frequent
+        transformation.feature_selection_method: mutual_info
+        transformation.feature_selection_mode: manual
+        transformation.n_features: 4
+        transformation.numerical_columns:
+        - sepal length (cm)
+        - sepal width (cm)
+        - petal length (cm)
+        - petal width (cm)
+        transformation.numerical_imputation_strategy: mean
+        transformation.preprocessor_object_path: 
+          artifacts/data_transformation/preprocessor.pkl
+        transformation.scaling_method: standard
+        transformation.selected_features:
+        - sepal length (cm)
+        - sepal width (cm)
+        - petal length (cm)
+        - petal width (cm)
+        transformation.target_column: target
+        transformation.task_type: classification
+        transformation.test_path: artifacts/data_ingestion/test.csv
+        transformation.train_path: artifacts/data_ingestion/train.csv
+        transformation.transformed_test_path: 
+          artifacts/data_transformation/transformed_test.csv
+        transformation.transformed_train_path: 
+          artifacts/data_transformation/transformed_train.csv
+    outs:
+    - path: artifacts/data_transformation/preprocessor.pkl
+      hash: md5
+      md5: 91db438f155c03f3ed33f7a2e855e4b5
+      size: 2077
+    - path: artifacts/data_transformation/transformed_test.csv
+      hash: md5
+      md5: 2e64762b7b894ecf854597f9b76145fb
+      size: 2538
+    - path: artifacts/data_transformation/transformed_train.csv
+      hash: md5
+      md5: 224a040f2e01f041fc46e9106eda26e1
+      size: 9749
+  training:
+    cmd: python -m src.training.components.model_trainer
+    deps:
+    - path: artifacts/data_transformation/transformed_test.csv
+      hash: md5
+      md5: 2e64762b7b894ecf854597f9b76145fb
+      size: 2538
+    - path: artifacts/data_transformation/transformed_train.csv
+      hash: md5
+      md5: 224a040f2e01f041fc46e9106eda26e1
+      size: 9749
+    - path: src/training/components/model_trainer.py
+      hash: md5
+      md5: e116fbaa9cb8910ae29648fd60215d9f
+      size: 15270
+    params:
+      params.yaml:
+        training.evaluation_metric: f1
+        training.model_list: []
+        training.model_output_dir: models/training
+        training.random_state: 42
+        training.report_path: artifacts/model_trainer/model_training_report.json
+        training.selected_model: random_forest_classifier
+        training.target_column: target
+        training.task_type: classification
+        training.training_mode: auto
+        training.transformed_test_path: 
+          artifacts/data_transformation/transformed_test.csv
+        training.transformed_train_path: 
+          artifacts/data_transformation/transformed_train.csv
+    outs:
+    - path: artifacts/model_trainer/model_training_report.json
+      hash: md5
+      md5: dac2465ed59be6e456c18d349aa06627
+      size: 2765
+    - path: models/training/model_1.pkl
+      hash: md5
+      md5: 45eb915fafa9dba5c90222d621ea24e7
+      size: 339139
+    - path: models/training/model_2.pkl
+      hash: md5
+      md5: b5a36501f35f1a76b5e6298c2ae54a5d
+      size: 1011
+    - path: models/training/model_3.pkl
+      hash: md5
+      md5: 19e107dc0025ea717a116e0a6f0be281
+      size: 159931
+  tuning:
+    cmd: python -m src.training.components.model_tuner
+    deps:
+    - path: artifacts/data_transformation/transformed_test.csv
+      hash: md5
+      md5: 2e64762b7b894ecf854597f9b76145fb
+      size: 2538
+    - path: artifacts/data_transformation/transformed_train.csv
+      hash: md5
+      md5: 224a040f2e01f041fc46e9106eda26e1
+      size: 9749
+    - path: artifacts/model_trainer/model_training_report.json
+      hash: md5
+      md5: dac2465ed59be6e456c18d349aa06627
+      size: 2765
+    - path: models/training/model_1.pkl
+      hash: md5
+      md5: 45eb915fafa9dba5c90222d621ea24e7
+      size: 339139
+    - path: models/training/model_2.pkl
+      hash: md5
+      md5: b5a36501f35f1a76b5e6298c2ae54a5d
+      size: 1011
+    - path: models/training/model_3.pkl
+      hash: md5
+      md5: 19e107dc0025ea717a116e0a6f0be281
+      size: 159931
+    - path: src/training/components/model_tuner.py
+      hash: md5
+      md5: d29a723a0329d3d98d3679e952c60c2e
+      size: 20930
+    params:
+      params.yaml:
+        tuning.cv: 3
+        tuning.model_trainer_report_path: 
+          artifacts/model_trainer/model_training_report.json
+        tuning.models_to_tune: top_k
+        tuning.n_iter: 5
+        tuning.n_jobs: 1
+        tuning.random_state: 42
+        tuning.report_path: artifacts/model_tuner/model_tuning_report.json
+        tuning.scoring_metric: f1_weighted
+        tuning.target_column: target
+        tuning.task_type: classification
+        tuning.top_k: 3
+        tuning.transformed_test_path: 
+          artifacts/data_transformation/transformed_test.csv
+        tuning.transformed_train_path: 
+          artifacts/data_transformation/transformed_train.csv
+        tuning.tuner_output_dir: models/tuning
+    outs:
+    - path: artifacts/model_tuner/model_tuning_report.json
+      hash: md5
+      md5: 0926d88f233c89319ef798bed95825f3
+      size: 2370
+    - path: models/tuning/tuned_model_1.pkl
+      hash: md5
+      md5: 8371bbc15b266d0ee2a383dbd3449f80
+      size: 736180
+    - path: models/tuning/tuned_model_2.pkl
+      hash: md5
+      md5: aa20fb3364ba8851dab2291bcc7f1344
+      size: 643599
+    - path: models/tuning/tuned_model_3.pkl
+      hash: md5
+      md5: 8a855e64dc891a0be3b333e31a8717c8
+      size: 1007
+  evaluation:
+    cmd: python -m src.training.components.model_evaluation
+    deps:
+    - path: artifacts/data_transformation/transformed_test.csv
+      hash: md5
+      md5: 2e64762b7b894ecf854597f9b76145fb
+      size: 2538
+    - path: artifacts/model_trainer/model_training_report.json
+      hash: md5
+      md5: dac2465ed59be6e456c18d349aa06627
+      size: 2765
+    - path: artifacts/model_tuner/model_tuning_report.json
+      hash: md5
+      md5: 0926d88f233c89319ef798bed95825f3
+      size: 2370
+    - path: models/training/model_1.pkl
+      hash: md5
+      md5: 45eb915fafa9dba5c90222d621ea24e7
+      size: 339139
+    - path: models/training/model_2.pkl
+      hash: md5
+      md5: b5a36501f35f1a76b5e6298c2ae54a5d
+      size: 1011
+    - path: models/training/model_3.pkl
+      hash: md5
+      md5: 19e107dc0025ea717a116e0a6f0be281
+      size: 159931
+    - path: models/tuning/tuned_model_1.pkl
+      hash: md5
+      md5: 8371bbc15b266d0ee2a383dbd3449f80
+      size: 736180
+    - path: models/tuning/tuned_model_2.pkl
+      hash: md5
+      md5: aa20fb3364ba8851dab2291bcc7f1344
+      size: 643599
+    - path: models/tuning/tuned_model_3.pkl
+      hash: md5
+      md5: 8a855e64dc891a0be3b333e31a8717c8
+      size: 1007
+    - path: src/training/components/model_evaluation.py
+      hash: md5
+      md5: 54c8b804ba33a8584611a33161cfb5e4
+      size: 15917
+    params:
+      params.yaml:
+        evaluation.baseline_model_dir: models/training
+        evaluation.baseline_model_paths: []
+        evaluation.evaluation_metric: f1
+        evaluation.evaluator_output_path: models/final/final_model.pkl
+        evaluation.minimum_performance_threshold: 0.6
+        evaluation.overfitting_threshold: 0.1
+        evaluation.report_path: 
+          artifacts/model_evaluator/model_evaluation_report.json
+        evaluation.target_column: target
+        evaluation.task_type: classification
+        evaluation.trainer_report_path: 
+          artifacts/model_trainer/model_training_report.json
+        evaluation.transformed_test_path: 
+          artifacts/data_transformation/transformed_test.csv
+        evaluation.tuned_model_dir: models/tuning
+        evaluation.tuned_model_paths: []
+        evaluation.tuner_report_path: 
+          artifacts/model_tuner/model_tuning_report.json
+    outs:
+    - path: artifacts/model_evaluator/model_evaluation_report.json
+      hash: md5
+      md5: 5589b485c3abbec0a9c6c147ef7cb119
+      size: 3841
+    - path: models/final/final_model.pkl
+      hash: md5
+      md5: b5125d7975667bcefa00d59cb0d37e64
+      size: 339223

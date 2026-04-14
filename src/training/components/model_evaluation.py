@@ -14,6 +14,7 @@ from sklearn.metrics import (
     recall_score,
 )
 
+from src.utils.config import load_stage_config
 from src.utils.common import load_object, save_object
 from src.utils.exception import CustomException
 from src.utils.logger import logger
@@ -122,6 +123,20 @@ class ModelEvaluator:
             artifact=self.model_tuner_artifact,
             artifact_attribute="tuned_model_paths",
         )
+
+        if not baseline_paths:
+            baseline_dir = getattr(self.config, "baseline_model_dir", None)
+            if baseline_dir:
+                baseline_paths = sorted(
+                    str(path) for path in self._resolve_path(baseline_dir).glob("*.pkl")
+                )
+
+        if not tuned_paths:
+            tuned_dir = getattr(self.config, "tuned_model_dir", None)
+            if tuned_dir:
+                tuned_paths = sorted(
+                    str(path) for path in self._resolve_path(tuned_dir).glob("*.pkl")
+                )
 
         model_entries = []
 
@@ -284,8 +299,13 @@ class ModelEvaluator:
         return str(output_path)
 
     def _save_report(self, ranked_results, threshold_passed, threshold_value):
-        output_path = self._resolve_path(getattr(self.config, "evaluator_output_path", None))
-        report_path = output_path.parent / "model_evaluation_report.json"
+        report_path_value = getattr(self.config, "report_path", None)
+        if report_path_value:
+            report_path = self._resolve_path(report_path_value)
+            self._ensure_parent_directory(report_path)
+        else:
+            output_path = self._resolve_path(getattr(self.config, "evaluator_output_path", None))
+            report_path = output_path.parent / "model_evaluation_report.json"
 
         report_payload = {
             "evaluation_metric": getattr(self.config, "evaluation_metric", None),
@@ -385,3 +405,13 @@ class ModelEvaluator:
         except Exception as e:
             logger.exception("Model evaluation failed")
             raise CustomException(e, sys)
+
+
+def main():
+    config = load_stage_config("evaluation")
+    evaluator = ModelEvaluator(config=config)
+    evaluator.initiate_model_evaluation()
+
+
+if __name__ == "__main__":
+    main()

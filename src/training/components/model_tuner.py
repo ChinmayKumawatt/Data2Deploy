@@ -22,6 +22,7 @@ from sklearn.metrics import (
 )
 from sklearn.model_selection import RandomizedSearchCV
 
+from src.utils.config import load_stage_config
 from src.utils.common import save_object
 from src.utils.exception import CustomException
 from src.utils.logger import logger
@@ -126,7 +127,7 @@ class ModelTuner:
             "logistic_regression": LogisticRegression(
                 random_state=random_state,
                 max_iter=1000,
-                solver="liblinear",
+                solver="lbfgs",
             ),
             "random_forest_classifier": RandomForestClassifier(
                 random_state=random_state,
@@ -264,8 +265,8 @@ class ModelTuner:
         search_spaces = {
             "logistic_regression": {
                 "C": [0.01, 0.1, 1.0, 10.0, 100.0],
-                "penalty": ["l1", "l2"],
-                "solver": ["liblinear"],
+                "penalty": ["l2"],
+                "solver": ["lbfgs", "newton-cg", "saga"],
                 "max_iter": [500, 1000, 1500],
             },
             "random_forest_classifier": {
@@ -354,7 +355,7 @@ class ModelTuner:
             cv=int(getattr(self.config, "cv", 3)),
             scoring=getattr(self.config, "scoring_metric", None),
             random_state=self._safe_random_state(),
-            n_jobs=-1,
+            n_jobs=int(getattr(self.config, "n_jobs", 1)),
             verbose=0,
         )
 
@@ -390,8 +391,22 @@ class ModelTuner:
     def _is_higher_score_better(self, metric_name):
         return metric_name.lower() in {"accuracy", "precision", "recall", "f1", "r2"}
 
+    def _normalize_metric_name(self, metric_name):
+        normalized_name = metric_name.lower()
+
+        metric_aliases = {
+            "f1_weighted": "f1",
+            "precision_weighted": "precision",
+            "recall_weighted": "recall",
+            "neg_mean_absolute_error": "mae",
+            "neg_root_mean_squared_error": "rmse",
+            "neg_mean_squared_error": "rmse",
+        }
+
+        return metric_aliases.get(normalized_name, normalized_name)
+
     def _rank_tuned_models(self, tuned_results, ranking_metric):
-        metric_name = ranking_metric.lower()
+        metric_name = self._normalize_metric_name(ranking_metric)
 
         for result in tuned_results:
             if metric_name not in result["test_metrics"]:
@@ -423,9 +438,14 @@ class ModelTuner:
         return saved_paths
 
     def _save_report(self, tuned_results):
-        tuner_output_dir = self._resolve_path(getattr(self.config, "tuner_output_dir", None))
-        self._ensure_directory(tuner_output_dir)
-        report_path = tuner_output_dir / "model_tuning_report.json"
+        report_path_value = getattr(self.config, "report_path", None)
+        if report_path_value:
+            report_path = self._resolve_path(report_path_value)
+            self._ensure_directory(report_path.parent)
+        else:
+            tuner_output_dir = self._resolve_path(getattr(self.config, "tuner_output_dir", None))
+            self._ensure_directory(tuner_output_dir)
+            report_path = tuner_output_dir / "model_tuning_report.json"
 
         report_payload = {
             "scoring_metric": getattr(self.config, "scoring_metric", None),
@@ -525,3 +545,13 @@ class ModelTuner:
         except Exception as e:
             logger.exception("Model tuning failed")
             raise CustomException(e, sys)
+
+
+def main():
+    config = load_stage_config("tuning")
+    tuner = ModelTuner(config=config)
+    tuner.initiate_model_tuning()
+
+
+if __name__ == "__main__":
+    main()
