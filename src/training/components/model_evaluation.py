@@ -75,6 +75,11 @@ class ModelEvaluator:
         if X_test.empty:
             raise ValueError("Test features are empty")
 
+        if not pd.api.types.is_numeric_dtype(y_test):
+            from sklearn.preprocessing import LabelEncoder
+            le = LabelEncoder()
+            y_test = pd.Series(le.fit_transform(y_test.astype(str)), index=y_test.index)
+
         return X_test, y_test
 
     def _infer_task_type(self, y_test):

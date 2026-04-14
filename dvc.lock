@@ -13,40 +13,40 @@ stages:
       size: 6523
     params:
       params.yaml:
-        ingestion.dataset_path: data/dataset.csv
+        ingestion.dataset_path: data\housing.csv
         ingestion.min_rows: 100
         ingestion.random_state: 42
         ingestion.raw_path: artifacts/data_ingestion/raw.csv
         ingestion.stratify: true
-        ingestion.target_column: target
-        ingestion.task_type: classification
+        ingestion.target_column: median_house_value
+        ingestion.task_type: regression
         ingestion.test_path: artifacts/data_ingestion/test.csv
         ingestion.test_size: 0.2
         ingestion.train_path: artifacts/data_ingestion/train.csv
     outs:
     - path: artifacts/data_ingestion/raw.csv
       hash: md5
-      md5: 5ffa5eddc8501a79e589344ed4574b7b
-      size: 2909
+      md5: e2727d25f2d2ef8d2735abe99540ec51
+      size: 1444170
     - path: artifacts/data_ingestion/test.csv
       hash: md5
-      md5: d4756fc3d8aa3a392a46ad13a7fc95b7
-      size: 648
+      md5: 081c945bf4b403b25c21e0af75406e85
+      size: 287971
     - path: artifacts/data_ingestion/train.csv
       hash: md5
-      md5: e46dbd27335d08071cb83d083bce3edb
-      size: 2339
+      md5: 52b366f8bc6d63bfcd9fdbb16dbcb4aa
+      size: 1156336
   validation:
     cmd: python -m src.training.components.data_validation
     deps:
     - path: artifacts/data_ingestion/test.csv
       hash: md5
-      md5: d4756fc3d8aa3a392a46ad13a7fc95b7
-      size: 648
+      md5: 081c945bf4b403b25c21e0af75406e85
+      size: 287971
     - path: artifacts/data_ingestion/train.csv
       hash: md5
-      md5: e46dbd27335d08071cb83d083bce3edb
-      size: 2339
+      md5: 52b366f8bc6d63bfcd9fdbb16dbcb4aa
+      size: 1156336
     - path: src/training/components/data_validation.py
       hash: md5
       md5: ccf3bd0e5363f5ed2d30ee7618d704da
@@ -59,57 +59,54 @@ stages:
         validation.report_path: artifacts/data_validation/validation_report.json
         validation.schema:
           columns:
-            sepal length (cm): float64
-            sepal width (cm): float64
-            petal length (cm): float64
-            petal width (cm): float64
-            target: int64
-        validation.target_column: target
+            longitude: float64
+            latitude: float64
+            housing_median_age: float64
+            total_rooms: float64
+            total_bedrooms: float64
+            population: float64
+            households: float64
+            median_income: float64
+            median_house_value: float64
+            ocean_proximity: str
+        validation.target_column: median_house_value
         validation.test_path: artifacts/data_ingestion/test.csv
         validation.train_path: artifacts/data_ingestion/train.csv
     outs:
     - path: artifacts/data_validation/validation_report.json
       hash: md5
-      md5: e5b5da0396251fd15bbc30605e068c69
-      size: 3253
+      md5: b5f0123ee7243261b4cd0e13ed23f6dc
+      size: 197751
   transformation:
     cmd: python -m src.training.components.data_transformation
     deps:
     - path: artifacts/data_ingestion/test.csv
       hash: md5
-      md5: d4756fc3d8aa3a392a46ad13a7fc95b7
-      size: 648
+      md5: 081c945bf4b403b25c21e0af75406e85
+      size: 287971
     - path: artifacts/data_ingestion/train.csv
       hash: md5
-      md5: e46dbd27335d08071cb83d083bce3edb
-      size: 2339
+      md5: 52b366f8bc6d63bfcd9fdbb16dbcb4aa
+      size: 1156336
     - path: src/training/components/data_transformation.py
       hash: md5
-      md5: 66bf68b1d98e42c5cbb9ede1f16cda2d
-      size: 18219
+      md5: e3a783464f4d1d7cac9d45a642329b33
+      size: 19219
     params:
       params.yaml:
-        transformation.categorical_columns: []
+        transformation.categorical_columns:
         transformation.categorical_imputation_strategy: most_frequent
         transformation.feature_selection_method: mutual_info
-        transformation.feature_selection_mode: manual
-        transformation.n_features: 4
+        transformation.feature_selection_mode: auto
+        transformation.n_features: 5
         transformation.numerical_columns:
-        - sepal length (cm)
-        - sepal width (cm)
-        - petal length (cm)
-        - petal width (cm)
         transformation.numerical_imputation_strategy: mean
         transformation.preprocessor_object_path: 
           artifacts/data_transformation/preprocessor.pkl
         transformation.scaling_method: standard
-        transformation.selected_features:
-        - sepal length (cm)
-        - sepal width (cm)
-        - petal length (cm)
-        - petal width (cm)
-        transformation.target_column: target
-        transformation.task_type: classification
+        transformation.selected_features: []
+        transformation.target_column: median_house_value
+        transformation.task_type: regression
         transformation.test_path: artifacts/data_ingestion/test.csv
         transformation.train_path: artifacts/data_ingestion/train.csv
         transformation.transformed_test_path: 
@@ -119,41 +116,41 @@ stages:
     outs:
     - path: artifacts/data_transformation/preprocessor.pkl
       hash: md5
-      md5: 91db438f155c03f3ed33f7a2e855e4b5
-      size: 2077
+      md5: aca8ed8b5f8ce2bc1a627b0cad52a6f2
+      size: 2438
     - path: artifacts/data_transformation/transformed_test.csv
       hash: md5
-      md5: 2e64762b7b894ecf854597f9b76145fb
-      size: 2538
+      md5: 0425b2cc623b6e7a26b6a428bd7c99a6
+      size: 447218
     - path: artifacts/data_transformation/transformed_train.csv
       hash: md5
-      md5: 224a040f2e01f041fc46e9106eda26e1
-      size: 9749
+      md5: 08e0542ffe59b13673d692c41a920df1
+      size: 1788484
   training:
     cmd: python -m src.training.components.model_trainer
     deps:
     - path: artifacts/data_transformation/transformed_test.csv
       hash: md5
-      md5: 2e64762b7b894ecf854597f9b76145fb
-      size: 2538
+      md5: 0425b2cc623b6e7a26b6a428bd7c99a6
+      size: 447218
     - path: artifacts/data_transformation/transformed_train.csv
       hash: md5
-      md5: 224a040f2e01f041fc46e9106eda26e1
-      size: 9749
+      md5: 08e0542ffe59b13673d692c41a920df1
+      size: 1788484
     - path: src/training/components/model_trainer.py
       hash: md5
-      md5: e116fbaa9cb8910ae29648fd60215d9f
-      size: 15270
+      md5: 4ba761447dc667921464b2c465afad7e
+      size: 15696
     params:
       params.yaml:
-        training.evaluation_metric: f1
+        training.evaluation_metric: r2
         training.model_list: []
         training.model_output_dir: models/training
         training.random_state: 42
         training.report_path: artifacts/model_trainer/model_training_report.json
-        training.selected_model: random_forest_classifier
-        training.target_column: target
-        training.task_type: classification
+        training.selected_model: random_forest_regressor
+        training.target_column: median_house_value
+        training.task_type: regression
         training.training_mode: auto
         training.transformed_test_path: 
           artifacts/data_transformation/transformed_test.csv
@@ -162,51 +159,51 @@ stages:
     outs:
     - path: artifacts/model_trainer/model_training_report.json
       hash: md5
-      md5: dac2465ed59be6e456c18d349aa06627
-      size: 2765
+      md5: 90f1b73f9cde65c177ecf08b30fb9e73
+      size: 2252
     - path: models/training/model_1.pkl
       hash: md5
-      md5: 45eb915fafa9dba5c90222d621ea24e7
-      size: 339139
+      md5: fe12cd9c0b244bc07acec0f8e470ce5c
+      size: 1117712
     - path: models/training/model_2.pkl
       hash: md5
-      md5: b5a36501f35f1a76b5e6298c2ae54a5d
-      size: 1011
+      md5: 21bf5117d5e263cc2f4ee95e65425feb
+      size: 447917
     - path: models/training/model_3.pkl
       hash: md5
-      md5: 19e107dc0025ea717a116e0a6f0be281
-      size: 159931
+      md5: b736e1b620e79af2957238c6a7763ff3
+      size: 288060
   tuning:
     cmd: python -m src.training.components.model_tuner
     deps:
     - path: artifacts/data_transformation/transformed_test.csv
       hash: md5
-      md5: 2e64762b7b894ecf854597f9b76145fb
-      size: 2538
+      md5: 0425b2cc623b6e7a26b6a428bd7c99a6
+      size: 447218
     - path: artifacts/data_transformation/transformed_train.csv
       hash: md5
-      md5: 224a040f2e01f041fc46e9106eda26e1
-      size: 9749
+      md5: 08e0542ffe59b13673d692c41a920df1
+      size: 1788484
     - path: artifacts/model_trainer/model_training_report.json
       hash: md5
-      md5: dac2465ed59be6e456c18d349aa06627
-      size: 2765
+      md5: 90f1b73f9cde65c177ecf08b30fb9e73
+      size: 2252
     - path: models/training/model_1.pkl
       hash: md5
-      md5: 45eb915fafa9dba5c90222d621ea24e7
-      size: 339139
+      md5: fe12cd9c0b244bc07acec0f8e470ce5c
+      size: 1117712
     - path: models/training/model_2.pkl
       hash: md5
-      md5: b5a36501f35f1a76b5e6298c2ae54a5d
-      size: 1011
+      md5: 21bf5117d5e263cc2f4ee95e65425feb
+      size: 447917
     - path: models/training/model_3.pkl
       hash: md5
-      md5: 19e107dc0025ea717a116e0a6f0be281
-      size: 159931
+      md5: b736e1b620e79af2957238c6a7763ff3
+      size: 288060
     - path: src/training/components/model_tuner.py
       hash: md5
-      md5: d29a723a0329d3d98d3679e952c60c2e
-      size: 20930
+      md5: c9ff6071bfdd3d85711d751699f9af45
+      size: 21356
     params:
       params.yaml:
         tuning.cv: 3
@@ -217,9 +214,9 @@ stages:
         tuning.n_jobs: 1
         tuning.random_state: 42
         tuning.report_path: artifacts/model_tuner/model_tuning_report.json
-        tuning.scoring_metric: f1_weighted
-        tuning.target_column: target
-        tuning.task_type: classification
+        tuning.scoring_metric: r2
+        tuning.target_column: median_house_value
+        tuning.task_type: regression
         tuning.top_k: 3
         tuning.transformed_test_path: 
           artifacts/data_transformation/transformed_test.csv
@@ -229,75 +226,75 @@ stages:
     outs:
     - path: artifacts/model_tuner/model_tuning_report.json
       hash: md5
-      md5: 0926d88f233c89319ef798bed95825f3
-      size: 2370
+      md5: 6e3413b0bf24d7bdf0581f1cfe5392f1
+      size: 2225
     - path: models/tuning/tuned_model_1.pkl
       hash: md5
-      md5: 8371bbc15b266d0ee2a383dbd3449f80
-      size: 736180
+      md5: 72195f903d8fff20731e3195d8446c8e
+      size: 1600303
     - path: models/tuning/tuned_model_2.pkl
       hash: md5
-      md5: aa20fb3364ba8851dab2291bcc7f1344
-      size: 643599
+      md5: 8685575cdb3c9839485999147f536128
+      size: 6383897
     - path: models/tuning/tuned_model_3.pkl
       hash: md5
-      md5: 8a855e64dc891a0be3b333e31a8717c8
-      size: 1007
+      md5: c59d1653d5063482e9bcc1e62bd49518
+      size: 341603
   evaluation:
     cmd: python -m src.training.components.model_evaluation
     deps:
     - path: artifacts/data_transformation/transformed_test.csv
       hash: md5
-      md5: 2e64762b7b894ecf854597f9b76145fb
-      size: 2538
+      md5: 0425b2cc623b6e7a26b6a428bd7c99a6
+      size: 447218
     - path: artifacts/model_trainer/model_training_report.json
       hash: md5
-      md5: dac2465ed59be6e456c18d349aa06627
-      size: 2765
+      md5: 90f1b73f9cde65c177ecf08b30fb9e73
+      size: 2252
     - path: artifacts/model_tuner/model_tuning_report.json
       hash: md5
-      md5: 0926d88f233c89319ef798bed95825f3
-      size: 2370
+      md5: 6e3413b0bf24d7bdf0581f1cfe5392f1
+      size: 2225
     - path: models/training/model_1.pkl
       hash: md5
-      md5: 45eb915fafa9dba5c90222d621ea24e7
-      size: 339139
+      md5: fe12cd9c0b244bc07acec0f8e470ce5c
+      size: 1117712
     - path: models/training/model_2.pkl
       hash: md5
-      md5: b5a36501f35f1a76b5e6298c2ae54a5d
-      size: 1011
+      md5: 21bf5117d5e263cc2f4ee95e65425feb
+      size: 447917
     - path: models/training/model_3.pkl
       hash: md5
-      md5: 19e107dc0025ea717a116e0a6f0be281
-      size: 159931
+      md5: b736e1b620e79af2957238c6a7763ff3
+      size: 288060
     - path: models/tuning/tuned_model_1.pkl
       hash: md5
-      md5: 8371bbc15b266d0ee2a383dbd3449f80
-      size: 736180
+      md5: 72195f903d8fff20731e3195d8446c8e
+      size: 1600303
     - path: models/tuning/tuned_model_2.pkl
       hash: md5
-      md5: aa20fb3364ba8851dab2291bcc7f1344
-      size: 643599
+      md5: 8685575cdb3c9839485999147f536128
+      size: 6383897
     - path: models/tuning/tuned_model_3.pkl
       hash: md5
-      md5: 8a855e64dc891a0be3b333e31a8717c8
-      size: 1007
+      md5: c59d1653d5063482e9bcc1e62bd49518
+      size: 341603
     - path: src/training/components/model_evaluation.py
       hash: md5
-      md5: 54c8b804ba33a8584611a33161cfb5e4
-      size: 15917
+      md5: 9041e0caf5a21f200f57a5cbca9e065f
+      size: 16152
     params:
       params.yaml:
         evaluation.baseline_model_dir: models/training
         evaluation.baseline_model_paths: []
-        evaluation.evaluation_metric: f1
+        evaluation.evaluation_metric: r2
         evaluation.evaluator_output_path: models/final/final_model.pkl
         evaluation.minimum_performance_threshold: 0.6
         evaluation.overfitting_threshold: 0.1
         evaluation.report_path: 
           artifacts/model_evaluator/model_evaluation_report.json
-        evaluation.target_column: target
-        evaluation.task_type: classification
+        evaluation.target_column: median_house_value
+        evaluation.task_type: regression
         evaluation.trainer_report_path: 
           artifacts/model_trainer/model_training_report.json
         evaluation.transformed_test_path: 
@@ -309,9 +306,9 @@ stages:
     outs:
     - path: artifacts/model_evaluator/model_evaluation_report.json
       hash: md5
-      md5: 5589b485c3abbec0a9c6c147ef7cb119
-      size: 3841
+      md5: 72078eee8dcda17eb09cc8d529d494c9
+      size: 3492
     - path: models/final/final_model.pkl
       hash: md5
-      md5: b5125d7975667bcefa00d59cb0d37e64
-      size: 339223
+      md5: 50a15cfd51ec631ed007f19e9e5e4aa2
+      size: 1117704

@@ -74,6 +74,17 @@ class DataTransformation:
         X_test = test_df.drop(columns=[target_column])
         y_test = test_df[target_column].copy()
 
+        # If classification and targets are categorical strings, encode them
+        task_type = self._get_task_type(y_train)
+        if task_type == "classification" and not pd.api.types.is_numeric_dtype(y_train):
+            from sklearn.preprocessing import LabelEncoder
+            le = LabelEncoder()
+            # Fit on both to safely capture all target categories existing in the dataset
+            le.fit(pd.concat([y_train, y_test]).astype(str))
+            
+            y_train = pd.Series(le.transform(y_train.astype(str)), index=y_train.index, name=y_train.name)
+            y_test = pd.Series(le.transform(y_test.astype(str)), index=y_test.index, name=y_test.name)
+
         if X_train.empty:
             raise ValueError("Train feature set is empty after dropping target column")
 
@@ -343,7 +354,15 @@ class DataTransformation:
         return X_train_transformed, X_test_transformed
 
     def _build_transformed_dataframe(self, transformed_array, y, feature_names):
-        transformed_df = pd.DataFrame(transformed_array, columns=feature_names, index=y.index)
+        import re
+        sanitized_names = []
+        for name in feature_names:
+            clean_name = re.sub(r'[\[\]<>]', '_', str(name))
+            if clean_name in sanitized_names:
+                clean_name = f"{clean_name}_{len(sanitized_names)}"
+            sanitized_names.append(clean_name)
+            
+        transformed_df = pd.DataFrame(transformed_array, columns=sanitized_names, index=y.index)
         transformed_df[self.config.target_column] = y.values
         return transformed_df
 

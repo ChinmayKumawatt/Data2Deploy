@@ -11,3 +11,6 @@ PyYAML
 xgboost
 lightgbm
 catboost
+fastapi
+uvicorn
+python-multipart

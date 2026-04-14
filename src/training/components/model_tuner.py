@@ -112,6 +112,13 @@ class ModelTuner:
         if X_test.empty:
             raise ValueError("Test features are empty")
 
+        if not pd.api.types.is_numeric_dtype(y_train) or not pd.api.types.is_numeric_dtype(y_test):
+            from sklearn.preprocessing import LabelEncoder
+            le = LabelEncoder()
+            le.fit(pd.concat([y_train, y_test]).astype(str))
+            y_train = pd.Series(le.transform(y_train.astype(str)), index=y_train.index)
+            y_test = pd.Series(le.transform(y_test.astype(str)), index=y_test.index)
+
         return X_train, y_train, X_test, y_test
 
     def _infer_task_type(self, y_train):
