@@ -1,0 +1,148 @@
+stages:
+  ingestion:
+    cmd: python src/training/components/data_ingestion.py
+    deps:
+      - data/dataset.csv
+      - src/training/components/data_ingestion.py
+    params:
+      - ingestion.dataset_path
+      - ingestion.target_column
+      - ingestion.test_size
+      - ingestion.random_state
+      - ingestion.min_rows
+      - ingestion.task_type
+      - ingestion.stratify
+      - ingestion.raw_path
+      - ingestion.train_path
+      - ingestion.test_path
+    outs:
+      - artifacts/data_ingestion/raw.csv
+      - artifacts/data_ingestion/train.csv
+      - artifacts/data_ingestion/test.csv
+
+  validation:
+    cmd: python src/training/components/data_validation.py
+    deps:
+      - artifacts/data_ingestion/train.csv
+      - artifacts/data_ingestion/test.csv
+      - src/training/components/data_validation.py
+    params:
+      - validation.train_path
+      - validation.test_path
+      - validation.target_column
+      - validation.schema
+      - validation.missing_value_threshold
+      - validation.drift_threshold
+      - validation.imbalance_threshold
+      - validation.report_path
+    outs:
+      - artifacts/data_validation/validation_report.json
+
+  transformation:
+    cmd: python src/training/components/data_transformation.py
+    deps:
+      - artifacts/data_ingestion/train.csv
+      - artifacts/data_ingestion/test.csv
+      - src/training/components/data_transformation.py
+    params:
+      - transformation.train_path
+      - transformation.test_path
+      - transformation.target_column
+      - transformation.feature_selection_mode
+      - transformation.selected_features
+      - transformation.n_features
+      - transformation.feature_selection_method
+      - transformation.task_type
+      - transformation.numerical_columns
+      - transformation.categorical_columns
+      - transformation.numerical_imputation_strategy
+      - transformation.categorical_imputation_strategy
+      - transformation.scaling_method
+      - transformation.preprocessor_object_path
+      - transformation.transformed_train_path
+      - transformation.transformed_test_path
+    outs:
+      - artifacts/data_transformation/transformed_train.csv
+      - artifacts/data_transformation/transformed_test.csv
+      - artifacts/data_transformation/preprocessor.pkl
+
+  training:
+    cmd: python src/training/components/model_trainer.py
+    deps:
+      - artifacts/data_transformation/transformed_train.csv
+      - artifacts/data_transformation/transformed_test.csv
+      - src/training/components/model_trainer.py
+    params:
+      - training.transformed_train_path
+      - training.transformed_test_path
+      - training.target_column
+      - training.training_mode
+      - training.selected_model
+      - training.model_list
+      - training.evaluation_metric
+      - training.model_output_dir
+      - training.random_state
+      - training.task_type
+    outs:
+      - models/training/model_1.pkl
+      - models/training/model_2.pkl
+      - models/training/model_3.pkl
+      - artifacts/model_trainer/model_training_report.json
+
+  tuning:
+    cmd: python src/training/components/model_tuner.py
+    deps:
+      - artifacts/data_transformation/transformed_train.csv
+      - artifacts/data_transformation/transformed_test.csv
+      - models/training/model_1.pkl
+      - models/training/model_2.pkl
+      - models/training/model_3.pkl
+      - artifacts/model_trainer/model_training_report.json
+      - src/training/components/model_tuner.py
+    params:
+      - tuning.transformed_train_path
+      - tuning.transformed_test_path
+      - tuning.target_column
+      - tuning.models_to_tune
+      - tuning.top_k
+      - tuning.model_trainer_report_path
+      - tuning.n_iter
+      - tuning.cv
+      - tuning.scoring_metric
+      - tuning.tuner_output_dir
+      - tuning.random_state
+      - tuning.task_type
+    outs:
+      - models/tuning/tuned_model_1.pkl
+      - models/tuning/tuned_model_2.pkl
+      - models/tuning/tuned_model_3.pkl
+      - artifacts/model_tuner/model_tuning_report.json
+
+  evaluation:
+    cmd: python src/training/components/model_evaluation.py
+    deps:
+      - artifacts/data_transformation/transformed_test.csv
+      - models/training/model_1.pkl
+      - models/training/model_2.pkl
+      - models/training/model_3.pkl
+      - models/tuning/tuned_model_1.pkl
+      - models/tuning/tuned_model_2.pkl
+      - models/tuning/tuned_model_3.pkl
+      - artifacts/model_trainer/model_training_report.json
+      - artifacts/model_tuner/model_tuning_report.json
+      - src/training/components/model_evaluation.py
+    params:
+      - evaluation.transformed_test_path
+      - evaluation.target_column
+      - evaluation.evaluation_metric
+      - evaluation.minimum_performance_threshold
+      - evaluation.evaluator_output_path
+      - evaluation.task_type
+      - evaluation.baseline_model_paths
+      - evaluation.tuned_model_paths
+      - evaluation.trainer_report_path
+      - evaluation.tuner_report_path
+      - evaluation.overfitting_threshold
+    outs:
+      - models/final/final_model.pkl
+      - artifacts/model_evaluator/model_evaluation_report.json
