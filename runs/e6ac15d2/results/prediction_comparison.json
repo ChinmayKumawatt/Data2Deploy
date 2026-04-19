@@ -1,0 +1,213 @@
+{
+    "task_type": "classification",
+    "metric_label": "F1",
+    "top_models": [
+        {
+            "display_name": "logistic_regression",
+            "model_type": "baseline",
+            "score": 0.7922878401242228,
+            "metrics": {
+                "accuracy": 0.801423487544484,
+                "precision": 0.7906832138174618,
+                "recall": 0.801423487544484,
+                "f1": 0.7922878401242228
+            },
+            "model_path": "C:\\Users\\chinm\\Desktop\\Data2Deploy\\runs\\e6ac15d2\\models\\training\\model_1.pkl"
+        },
+        {
+            "display_name": "logistic_regression",
+            "model_type": "tuned",
+            "score": 0.7916704079705396,
+            "metrics": {
+                "accuracy": 0.800711743772242,
+                "precision": 0.7899619295343108,
+                "recall": 0.800711743772242,
+                "f1": 0.7916704079705396
+            },
+            "model_path": "C:\\Users\\chinm\\Desktop\\Data2Deploy\\runs\\e6ac15d2\\models\\tuning\\tuned_model_1.pkl"
+        },
+        {
+            "display_name": "catboost_classifier",
+            "model_type": "tuned",
+            "score": 0.7856719767823509,
+            "metrics": {
+                "accuracy": 0.797153024911032,
+                "precision": 0.7848725427483207,
+                "recall": 0.797153024911032,
+                "f1": 0.7856719767823509
+            },
+            "model_path": "C:\\Users\\chinm\\Desktop\\Data2Deploy\\runs\\e6ac15d2\\models\\tuning\\tuned_model_2.pkl"
+        }
+    ],
+    "preview_rows": [
+        {
+            "row_id": 1,
+            "actual": "No",
+            "logistic_regression_prediction": "Yes",
+            "catboost_classifier_prediction": "Yes"
+        },
+        {
+            "row_id": 2,
+            "actual": "Yes",
+            "logistic_regression_prediction": "Yes",
+            "catboost_classifier_prediction": "Yes"
+        },
+        {
+            "row_id": 3,
+            "actual": "Yes",
+            "logistic_regression_prediction": "No",
+            "catboost_classifier_prediction": "Yes"
+        },
+        {
+            "row_id": 4,
+            "actual": "No",
+            "logistic_regression_prediction": "No",
+            "catboost_classifier_prediction": "No"
+        },
+        {
+            "row_id": 5,
+            "actual": "No",
+            "logistic_regression_prediction": "No",
+            "catboost_classifier_prediction": "No"
+        },
+        {
+            "row_id": 6,
+            "actual": "No",
+            "logistic_regression_prediction": "No",
+            "catboost_classifier_prediction": "No"
+        },
+        {
+            "row_id": 7,
+            "actual": "No",
+            "logistic_regression_prediction": "No",
+            "catboost_classifier_prediction": "No"
+        },
+        {
+            "row_id": 8,
+            "actual": "Yes",
+            "logistic_regression_prediction": "Yes",
+            "catboost_classifier_prediction": "Yes"
+        },
+        {
+            "row_id": 9,
+            "actual": "No",
+            "logistic_regression_prediction": "No",
+            "catboost_classifier_prediction": "No"
+        },
+        {
+            "row_id": 10,
+            "actual": "No",
+            "logistic_regression_prediction": "No",
+            "catboost_classifier_prediction": "No"
+        },
+        {
+            "row_id": 11,
+            "actual": "No",
+            "logistic_regression_prediction": "No",
+            "catboost_classifier_prediction": "No"
+        },
+        {
+            "row_id": 12,
+            "actual": "No",
+            "logistic_regression_prediction": "Yes",
+            "catboost_classifier_prediction": "Yes"
+        },
+        {
+            "row_id": 13,
+            "actual": "Yes",
+            "logistic_regression_prediction": "No",
+            "catboost_classifier_prediction": "No"
+        },
+        {
+            "row_id": 14,
+            "actual": "No",
+            "logistic_regression_prediction": "No",
+            "catboost_classifier_prediction": "No"
+        },
+        {
+            "row_id": 15,
+            "actual": "No",
+            "logistic_regression_prediction": "No",
+            "catboost_classifier_prediction": "No"
+        },
+        {
+            "row_id": 16,
+            "actual": "No",
+            "logistic_regression_prediction": "No",
+            "catboost_classifier_prediction": "No"
+        },
+        {
+            "row_id": 17,
+            "actual": "No",
+            "logistic_regression_prediction": "No",
+            "catboost_classifier_prediction": "No"
+        },
+        {
+            "row_id": 18,
+            "actual": "No",
+            "logistic_regression_prediction": "No",
+            "catboost_classifier_prediction": "No"
+        },
+        {
+            "row_id": 19,
+            "actual": "No",
+            "logistic_regression_prediction": "No",
+            "catboost_classifier_prediction": "No"
+        },
+        {
+            "row_id": 20,
+            "actual": "No",
+            "logistic_regression_prediction": "No",
+            "catboost_classifier_prediction": "No"
+        },
+        {
+            "row_id": 21,
+            "actual": "No",
+            "logistic_regression_prediction": "No",
+            "catboost_classifier_prediction": "No"
+        },
+        {
+            "row_id": 22,
+            "actual": "No",
+            "logistic_regression_prediction": "No",
+            "catboost_classifier_prediction": "No"
+        },
+        {
+            "row_id": 23,
+            "actual": "Yes",
+            "logistic_regression_prediction": "Yes",
+            "catboost_classifier_prediction": "Yes"
+        },
+        {
+            "row_id": 24,
+            "actual": "No",
+            "logistic_regression_prediction": "Yes",
+            "catboost_classifier_prediction": "No"
+        },
+        {
+            "row_id": 25,
+            "actual": "No",
+            "logistic_regression_prediction": "No",
+            "catboost_classifier_prediction": "No"
+        }
+    ],
+    "row_count": 1405,
+    "prediction_csv_path": "C:\\Users\\chinm\\Desktop\\Data2Deploy\\runs\\e6ac15d2\\results\\prediction_comparison.csv",
+    "score_plot": [
+        {
+            "label": "logistic_regression",
+            "score": 0.7922878401242228,
+            "width_pct": 79.22878401242228
+        },
+        {
+            "label": "logistic_regression",
+            "score": 0.7916704079705396,
+            "width_pct": 79.16704079705396
+        },
+        {
+            "label": "catboost_classifier",
+            "score": 0.7856719767823509,
+            "width_pct": 78.56719767823509
+        }
+    ]
+}

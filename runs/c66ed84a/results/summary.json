@@ -1,0 +1,408 @@
+{
+    "run_id": "c66ed84a",
+    "task_type": "classification",
+    "target_column": "target",
+    "feature_mode": "auto",
+    "selected_features": [],
+    "n_features": 3,
+    "dataset_rows": 150,
+    "dataset_columns": 5,
+    "metric_label": "F1",
+    "best_model": "tuned_model_1",
+    "best_score": 1.0,
+    "threshold_passed": true,
+    "training_ranking": [
+        {
+            "rank": 1,
+            "model_name": "logistic_regression",
+            "score": 0.9333333333333333,
+            "metrics": {
+                "accuracy": 0.9333333333333333,
+                "precision": 0.9333333333333333,
+                "recall": 0.9333333333333333,
+                "f1": 0.9333333333333333
+            },
+            "model_path": "C:\\Users\\chinm\\Desktop\\Data2Deploy\\runs\\c66ed84a\\models\\training\\model_1.pkl"
+        },
+        {
+            "rank": 2,
+            "model_name": "gradient_boosting_classifier",
+            "score": 0.9333333333333333,
+            "metrics": {
+                "accuracy": 0.9333333333333333,
+                "precision": 0.9333333333333333,
+                "recall": 0.9333333333333333,
+                "f1": 0.9333333333333333
+            },
+            "model_path": "C:\\Users\\chinm\\Desktop\\Data2Deploy\\runs\\c66ed84a\\models\\training\\model_2.pkl"
+        },
+        {
+            "rank": 3,
+            "model_name": "xgb_classifier",
+            "score": 0.9333333333333333,
+            "metrics": {
+                "accuracy": 0.9333333333333333,
+                "precision": 0.9333333333333333,
+                "recall": 0.9333333333333333,
+                "f1": 0.9333333333333333
+            },
+            "model_path": "C:\\Users\\chinm\\Desktop\\Data2Deploy\\runs\\c66ed84a\\models\\training\\model_3.pkl"
+        }
+    ],
+    "tuning_models": [
+        {
+            "rank": 1,
+            "model_name": "logistic_regression",
+            "best_params": {
+                "solver": "lbfgs",
+                "penalty": "l2",
+                "max_iter": 1000,
+                "C": 100.0
+            },
+            "cv_best_score": 0.9581085482066749,
+            "ranking_score": 1.0,
+            "test_metrics": {
+                "accuracy": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "f1": 1.0
+            },
+            "baseline_test_score": null,
+            "saved_model_path": "C:\\Users\\chinm\\Desktop\\Data2Deploy\\runs\\c66ed84a\\models\\tuning\\tuned_model_1.pkl"
+        }
+    ],
+    "evaluation_models": [
+        {
+            "rank": 1,
+            "model_name": "tuned_model_1",
+            "model_type": "tuned",
+            "model_path": "C:\\Users\\chinm\\Desktop\\Data2Deploy\\runs\\c66ed84a\\models\\tuning\\tuned_model_1.pkl",
+            "score": 1.0,
+            "metrics": {
+                "accuracy": 1.0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "f1": 1.0
+            },
+            "train_reference_score": 0.9581085482066749,
+            "score_gap": 0.041891451793325096,
+            "overfitting_warning": false
+        },
+        {
+            "rank": 2,
+            "model_name": "model_1",
+            "model_type": "baseline",
+            "model_path": "C:\\Users\\chinm\\Desktop\\Data2Deploy\\runs\\c66ed84a\\models\\training\\model_1.pkl",
+            "score": 0.9333333333333333,
+            "metrics": {
+                "accuracy": 0.9333333333333333,
+                "precision": 0.9333333333333333,
+                "recall": 0.9333333333333333,
+                "f1": 0.9333333333333333
+            },
+            "train_reference_score": 0.9333333333333333,
+            "score_gap": 0.0,
+            "overfitting_warning": false
+        },
+        {
+            "rank": 3,
+            "model_name": "model_2",
+            "model_type": "baseline",
+            "model_path": "C:\\Users\\chinm\\Desktop\\Data2Deploy\\runs\\c66ed84a\\models\\training\\model_2.pkl",
+            "score": 0.9333333333333333,
+            "metrics": {
+                "accuracy": 0.9333333333333333,
+                "precision": 0.9333333333333333,
+                "recall": 0.9333333333333333,
+                "f1": 0.9333333333333333
+            },
+            "train_reference_score": 0.9333333333333333,
+            "score_gap": 0.0,
+            "overfitting_warning": false
+        },
+        {
+            "rank": 4,
+            "model_name": "model_3",
+            "model_type": "baseline",
+            "model_path": "C:\\Users\\chinm\\Desktop\\Data2Deploy\\runs\\c66ed84a\\models\\training\\model_3.pkl",
+            "score": 0.9333333333333333,
+            "metrics": {
+                "accuracy": 0.9333333333333333,
+                "precision": 0.9333333333333333,
+                "recall": 0.9333333333333333,
+                "f1": 0.9333333333333333
+            },
+            "train_reference_score": 0.9333333333333333,
+            "score_gap": 0.0,
+            "overfitting_warning": false
+        }
+    ],
+    "comparison": {
+        "task_type": "classification",
+        "metric_label": "F1",
+        "top_models": [
+            {
+                "display_name": "logistic_regression",
+                "model_type": "tuned",
+                "score": 1.0,
+                "metrics": {
+                    "accuracy": 1.0,
+                    "precision": 1.0,
+                    "recall": 1.0,
+                    "f1": 1.0
+                },
+                "model_path": "C:\\Users\\chinm\\Desktop\\Data2Deploy\\runs\\c66ed84a\\models\\tuning\\tuned_model_1.pkl"
+            },
+            {
+                "display_name": "logistic_regression",
+                "model_type": "baseline",
+                "score": 0.9333333333333333,
+                "metrics": {
+                    "accuracy": 0.9333333333333333,
+                    "precision": 0.9333333333333333,
+                    "recall": 0.9333333333333333,
+                    "f1": 0.9333333333333333
+                },
+                "model_path": "C:\\Users\\chinm\\Desktop\\Data2Deploy\\runs\\c66ed84a\\models\\training\\model_1.pkl"
+            },
+            {
+                "display_name": "gradient_boosting_classifier",
+                "model_type": "baseline",
+                "score": 0.9333333333333333,
+                "metrics": {
+                    "accuracy": 0.9333333333333333,
+                    "precision": 0.9333333333333333,
+                    "recall": 0.9333333333333333,
+                    "f1": 0.9333333333333333
+                },
+                "model_path": "C:\\Users\\chinm\\Desktop\\Data2Deploy\\runs\\c66ed84a\\models\\training\\model_2.pkl"
+            }
+        ],
+        "preview_rows": [
+            {
+                "row_id": 1,
+                "actual": 1,
+                "logistic_regression_prediction": 1,
+                "gradient_boosting_classifier_prediction": 1
+            },
+            {
+                "row_id": 2,
+                "actual": 1,
+                "logistic_regression_prediction": 1,
+                "gradient_boosting_classifier_prediction": 1
+            },
+            {
+                "row_id": 3,
+                "actual": 2,
+                "logistic_regression_prediction": 2,
+                "gradient_boosting_classifier_prediction": 2
+            },
+            {
+                "row_id": 4,
+                "actual": 0,
+                "logistic_regression_prediction": 0,
+                "gradient_boosting_classifier_prediction": 0
+            },
+            {
+                "row_id": 5,
+                "actual": 2,
+                "logistic_regression_prediction": 2,
+                "gradient_boosting_classifier_prediction": 2
+            },
+            {
+                "row_id": 6,
+                "actual": 1,
+                "logistic_regression_prediction": 1,
+                "gradient_boosting_classifier_prediction": 1
+            },
+            {
+                "row_id": 7,
+                "actual": 1,
+                "logistic_regression_prediction": 1,
+                "gradient_boosting_classifier_prediction": 1
+            },
+            {
+                "row_id": 8,
+                "actual": 0,
+                "logistic_regression_prediction": 0,
+                "gradient_boosting_classifier_prediction": 0
+            },
+            {
+                "row_id": 9,
+                "actual": 2,
+                "logistic_regression_prediction": 2,
+                "gradient_boosting_classifier_prediction": 1
+            },
+            {
+                "row_id": 10,
+                "actual": 2,
+                "logistic_regression_prediction": 2,
+                "gradient_boosting_classifier_prediction": 2
+            },
+            {
+                "row_id": 11,
+                "actual": 0,
+                "logistic_regression_prediction": 0,
+                "gradient_boosting_classifier_prediction": 0
+            },
+            {
+                "row_id": 12,
+                "actual": 0,
+                "logistic_regression_prediction": 0,
+                "gradient_boosting_classifier_prediction": 0
+            },
+            {
+                "row_id": 13,
+                "actual": 0,
+                "logistic_regression_prediction": 0,
+                "gradient_boosting_classifier_prediction": 0
+            },
+            {
+                "row_id": 14,
+                "actual": 1,
+                "logistic_regression_prediction": 1,
+                "gradient_boosting_classifier_prediction": 1
+            },
+            {
+                "row_id": 15,
+                "actual": 2,
+                "logistic_regression_prediction": 2,
+                "gradient_boosting_classifier_prediction": 2
+            },
+            {
+                "row_id": 16,
+                "actual": 0,
+                "logistic_regression_prediction": 0,
+                "gradient_boosting_classifier_prediction": 0
+            },
+            {
+                "row_id": 17,
+                "actual": 1,
+                "logistic_regression_prediction": 2,
+                "gradient_boosting_classifier_prediction": 2
+            },
+            {
+                "row_id": 18,
+                "actual": 0,
+                "logistic_regression_prediction": 0,
+                "gradient_boosting_classifier_prediction": 0
+            },
+            {
+                "row_id": 19,
+                "actual": 2,
+                "logistic_regression_prediction": 2,
+                "gradient_boosting_classifier_prediction": 2
+            },
+            {
+                "row_id": 20,
+                "actual": 0,
+                "logistic_regression_prediction": 0,
+                "gradient_boosting_classifier_prediction": 0
+            },
+            {
+                "row_id": 21,
+                "actual": 1,
+                "logistic_regression_prediction": 1,
+                "gradient_boosting_classifier_prediction": 1
+            },
+            {
+                "row_id": 22,
+                "actual": 2,
+                "logistic_regression_prediction": 1,
+                "gradient_boosting_classifier_prediction": 2
+            },
+            {
+                "row_id": 23,
+                "actual": 0,
+                "logistic_regression_prediction": 0,
+                "gradient_boosting_classifier_prediction": 0
+            },
+            {
+                "row_id": 24,
+                "actual": 0,
+                "logistic_regression_prediction": 0,
+                "gradient_boosting_classifier_prediction": 0
+            },
+            {
+                "row_id": 25,
+                "actual": 1,
+                "logistic_regression_prediction": 1,
+                "gradient_boosting_classifier_prediction": 1
+            }
+        ],
+        "row_count": 30,
+        "prediction_csv_path": "C:\\Users\\chinm\\Desktop\\Data2Deploy\\runs\\c66ed84a\\results\\prediction_comparison.csv",
+        "score_plot": [
+            {
+                "label": "logistic_regression",
+                "score": 1.0,
+                "width_pct": 100.0
+            },
+            {
+                "label": "logistic_regression",
+                "score": 0.9333333333333333,
+                "width_pct": 93.33333333333333
+            },
+            {
+                "label": "gradient_boosting_classifier",
+                "score": 0.9333333333333333,
+                "width_pct": 93.33333333333333
+            }
+        ]
+    },
+    "dataset_name": "dataset.csv",
+    "dataset_path": "C:\\Users\\chinm\\Desktop\\Data2Deploy\\runs\\c66ed84a\\input\\dataset.csv",
+    "created_at": "2026-04-19T05:42:21.229878+00:00",
+    "training_options": {
+        "test_size": 0.2,
+        "random_state": 42,
+        "min_rows": 30,
+        "feature_selection_method": "mutual_info",
+        "numerical_imputation_strategy": "mean",
+        "categorical_imputation_strategy": "most_frequent",
+        "scaling_method": "standard",
+        "training_mode": "auto",
+        "model_list": [],
+        "top_k": 1,
+        "n_iter": 1,
+        "cv": 2,
+        "n_jobs": 1,
+        "minimum_performance_threshold": 0.3,
+        "overfitting_threshold": 0.1,
+        "missing_value_threshold": 0.35,
+        "drift_threshold": 0.6,
+        "imbalance_threshold": 0.9
+    },
+    "parameter_cards": [
+        {
+            "label": "Test Size",
+            "value": 0.2
+        },
+        {
+            "label": "Feature Mode",
+            "value": "auto"
+        },
+        {
+            "label": "Top K Tuned Models",
+            "value": 1
+        },
+        {
+            "label": "Random Search Iterations",
+            "value": 1
+        },
+        {
+            "label": "CV Folds",
+            "value": 2
+        },
+        {
+            "label": "Random State",
+            "value": 42
+        }
+    ],
+    "mlflow": {
+        "enabled": true,
+        "tracking_uri": "file:///C:/Users/chinm/Desktop/Data2Deploy/mlruns",
+        "experiment_name": "Data2Deploy",
+        "run_id": "e670bfc5a72b4905a77b4a42c0526f7a"
+    }
+}

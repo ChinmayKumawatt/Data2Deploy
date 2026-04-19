@@ -1,0 +1,91 @@
+ingestion:
+  dataset_path: C:\Users\chinm\Desktop\Data2Deploy\runs\3e1e6111\input\housing.csv
+  target_column: median_house_value
+  test_size: 0.2
+  random_state: 42
+  min_rows: 30
+  task_type: regression
+  stratify: true
+  raw_path: C:\Users\chinm\Desktop\Data2Deploy\runs\3e1e6111\artifacts\data_ingestion\raw.csv
+  train_path: C:\Users\chinm\Desktop\Data2Deploy\runs\3e1e6111\artifacts\data_ingestion\train.csv
+  test_path: C:\Users\chinm\Desktop\Data2Deploy\runs\3e1e6111\artifacts\data_ingestion\test.csv
+validation:
+  train_path: C:\Users\chinm\Desktop\Data2Deploy\runs\3e1e6111\artifacts\data_ingestion\train.csv
+  test_path: C:\Users\chinm\Desktop\Data2Deploy\runs\3e1e6111\artifacts\data_ingestion\test.csv
+  target_column: median_house_value
+  schema:
+    columns:
+      longitude: float64
+      latitude: float64
+      housing_median_age: float64
+      total_rooms: float64
+      total_bedrooms: float64
+      population: float64
+      households: float64
+      median_income: float64
+      median_house_value: float64
+      ocean_proximity: object
+  missing_value_threshold: 0.35
+  drift_threshold: 0.6
+  imbalance_threshold: 0.9
+  report_path: C:\Users\chinm\Desktop\Data2Deploy\runs\3e1e6111\artifacts\data_validation\validation_report.json
+transformation:
+  train_path: C:\Users\chinm\Desktop\Data2Deploy\runs\3e1e6111\artifacts\data_ingestion\train.csv
+  test_path: C:\Users\chinm\Desktop\Data2Deploy\runs\3e1e6111\artifacts\data_ingestion\test.csv
+  target_column: median_house_value
+  feature_selection_mode: auto
+  selected_features: []
+  n_features: 5
+  feature_selection_method: mutual_info
+  task_type: regression
+  numerical_columns: null
+  categorical_columns: null
+  numerical_imputation_strategy: mean
+  categorical_imputation_strategy: most_frequent
+  scaling_method: standard
+  preprocessor_object_path: C:\Users\chinm\Desktop\Data2Deploy\runs\3e1e6111\artifacts\data_transformation\preprocessor.pkl
+  target_encoder_path: C:\Users\chinm\Desktop\Data2Deploy\runs\3e1e6111\artifacts\data_transformation\target_encoder.json
+  transformed_train_path: C:\Users\chinm\Desktop\Data2Deploy\runs\3e1e6111\artifacts\data_transformation\transformed_train.csv
+  transformed_test_path: C:\Users\chinm\Desktop\Data2Deploy\runs\3e1e6111\artifacts\data_transformation\transformed_test.csv
+training:
+  transformed_train_path: C:\Users\chinm\Desktop\Data2Deploy\runs\3e1e6111\artifacts\data_transformation\transformed_train.csv
+  transformed_test_path: C:\Users\chinm\Desktop\Data2Deploy\runs\3e1e6111\artifacts\data_transformation\transformed_test.csv
+  target_column: median_house_value
+  training_mode: auto
+  selected_model: random_forest_regressor
+  model_list: []
+  evaluation_metric: r2
+  model_output_dir: C:\Users\chinm\Desktop\Data2Deploy\runs\3e1e6111\models\training
+  report_path: C:\Users\chinm\Desktop\Data2Deploy\runs\3e1e6111\artifacts\model_trainer\model_training_report.json
+  random_state: 42
+  task_type: regression
+tuning:
+  transformed_train_path: C:\Users\chinm\Desktop\Data2Deploy\runs\3e1e6111\artifacts\data_transformation\transformed_train.csv
+  transformed_test_path: C:\Users\chinm\Desktop\Data2Deploy\runs\3e1e6111\artifacts\data_transformation\transformed_test.csv
+  target_column: median_house_value
+  models_to_tune: top_k
+  top_k: 3
+  model_trainer_report_path: C:\Users\chinm\Desktop\Data2Deploy\runs\3e1e6111\artifacts\model_trainer\model_training_report.json
+  n_iter: 5
+  cv: 3
+  n_jobs: 1
+  scoring_metric: r2
+  tuner_output_dir: C:\Users\chinm\Desktop\Data2Deploy\runs\3e1e6111\models\tuning
+  report_path: C:\Users\chinm\Desktop\Data2Deploy\runs\3e1e6111\artifacts\model_tuner\model_tuning_report.json
+  random_state: 42
+  task_type: regression
+evaluation:
+  transformed_test_path: C:\Users\chinm\Desktop\Data2Deploy\runs\3e1e6111\artifacts\data_transformation\transformed_test.csv
+  target_column: median_house_value
+  evaluation_metric: r2
+  minimum_performance_threshold: 0.1
+  evaluator_output_path: C:\Users\chinm\Desktop\Data2Deploy\runs\3e1e6111\models\final\final_model.pkl
+  report_path: C:\Users\chinm\Desktop\Data2Deploy\runs\3e1e6111\artifacts\model_evaluator\model_evaluation_report.json
+  task_type: regression
+  baseline_model_paths: []
+  baseline_model_dir: C:\Users\chinm\Desktop\Data2Deploy\runs\3e1e6111\models\training
+  tuned_model_paths: []
+  tuned_model_dir: C:\Users\chinm\Desktop\Data2Deploy\runs\3e1e6111\models\tuning
+  trainer_report_path: C:\Users\chinm\Desktop\Data2Deploy\runs\3e1e6111\artifacts\model_trainer\model_training_report.json
+  tuner_report_path: C:\Users\chinm\Desktop\Data2Deploy\runs\3e1e6111\artifacts\model_tuner\model_tuning_report.json
+  overfitting_threshold: 0.1

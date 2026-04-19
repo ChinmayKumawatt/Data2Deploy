@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="results-hero">
+    <div>
+        <span class="eyebrow">Run History</span>
+        <h1>Saved model runs</h1>
+        <p>Review settings, scores, and tracking ids. Select multiple runs to compare them side by side.</p>
+    </div>
+    <a class="secondary-button" href="/">Start New Run</a>
+</section>
+
+<section class="dashboard-card standalone-card">
+    <form method="get" action="/experiments/compare">
+        <div class="section-head">
+            <h2>Saved Runs</h2>
+            <p>Choose two or more runs to compare. The score column uses the tracked metric for each run.</p>
+        </div>
+        {% if experiments %}
+        <div class="experiment-list">
+            {% for experiment in experiments %}
+            <label class="experiment-row">
+                <input type="checkbox" name="run_ids" value="{{ experiment.run_id }}">
+                <div class="experiment-main">
+                    <div class="experiment-head">
+                        <strong>{{ experiment.run_id }}</strong>
+                        <span>{{ experiment.dataset_name }}</span>
+                    </div>
+                    <div class="plot-row compact-plot">
+                        <span>{{ experiment.metric_label }}</span>
+                        <div class="plot-bar"><div style="width: {{ experiment.compare_score_width }}%;"></div></div>
+                        <strong>{{ "%.4f"|format(experiment.best_score) }}</strong>
+                    </div>
+                    <div class="experiment-meta">
+                        <span>Prediction field: {{ experiment.target_column }}</span>
+                        <span>Selection mode: {{ experiment.feature_mode }}</span>
+                        <span>Holdout split: {{ experiment.training_options.test_size }}</span>
+                        <span>Tracking id: {{ experiment.mlflow.run_id or "Unavailable" }}</span>
+                    </div>
+                </div>
+                <a class="secondary-button small-button" href="/runs/{{ experiment.run_id }}">View</a>
+            </label>
+            {% endfor %}
+        </div>
+        <div class="compare-actions">
+            <button type="submit" class="primary-button">Compare Runs</button>
+        </div>
+        {% else %}
+        <p class="muted-copy">No saved runs yet. Start a run from the studio and it will appear here.</p>
+        {% endif %}
+    </form>
+</section>
+{% endblock %}

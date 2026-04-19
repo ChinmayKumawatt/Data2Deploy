@@ -1,3 +1,4 @@
+import json
 import sys
 from pathlib import Path
 
@@ -24,6 +25,7 @@ class DataTransformationArtifact:
 class DataTransformation:
     def __init__(self, config):
         self.config = config
+        self.target_encoder_classes = None
 
     def _resolve_path(self, file_path):
         if not file_path:
@@ -81,6 +83,7 @@ class DataTransformation:
             le = LabelEncoder()
             # Fit on both to safely capture all target categories existing in the dataset
             le.fit(pd.concat([y_train, y_test]).astype(str))
+            self.target_encoder_classes = [str(value) for value in le.classes_]
             
             y_train = pd.Series(le.transform(y_train.astype(str)), index=y_train.index, name=y_train.name)
             y_test = pd.Series(le.transform(y_test.astype(str)), index=y_test.index, name=y_test.name)
@@ -412,6 +415,20 @@ class DataTransformation:
         logger.info("Preprocessor object saved at %s", preprocessor_object_path)
         return str(preprocessor_object_path)
 
+    def _save_target_encoder_metadata(self):
+        target_encoder_path = getattr(self.config, "target_encoder_path", None)
+        if not target_encoder_path or self.target_encoder_classes is None:
+            return None
+
+        target_encoder_path = self._resolve_path(target_encoder_path)
+        self._ensure_parent_directory(target_encoder_path)
+
+        with target_encoder_path.open("w", encoding="utf-8") as target_encoder_file:
+            json.dump({"classes": self.target_encoder_classes}, target_encoder_file, indent=4)
+
+        logger.info("Target encoder metadata saved at %s", target_encoder_path)
+        return str(target_encoder_path)
+
     def initiate_data_transformation(self):
         try:
             logger.info("Data transformation initiated")
@@ -456,6 +473,7 @@ class DataTransformation:
             )
 
             preprocessor_object_path = self._save_preprocessor_object(preprocessor)
+            self._save_target_encoder_metadata()
 
             logger.info("Data transformation completed successfully")
 

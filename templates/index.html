@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero-card">
+    <div class="hero-copy">
+        <span class="eyebrow">Model Studio</span>
+        <h1>Build, track, and compare model runs from a single data upload.</h1>
+        <p>
+            Upload a tabular dataset, choose the prediction column, decide how features should be selected,
+            and review held-out predictions from the top three models. Every run is also tracked so you can compare
+            settings and results over time.
+        </p>
+    </div>
+    <div class="hero-panel">
+        <div class="stat-pill">
+            <strong>Workflow</strong>
+            <span>Quality checks, preprocessing, training, tuning, evaluation</span>
+        </div>
+        <div class="stat-pill">
+            <strong>Saved Runs</strong>
+            <span>{{ experiments_count }} stored runs ready for comparison</span>
+        </div>
+    </div>
+</section>
+
+{% if error %}
+<div class="alert error">{{ error }}</div>
+{% endif %}
+
+<section class="studio-grid">
+    <form id="train-form" class="studio-card" action="/train" method="post" enctype="multipart/form-data">
+        <div class="section-head">
+            <h2>Run Setup</h2>
+            <p>Preview the data first, then choose the prediction column, feature strategy, and run settings.</p>
+        </div>
+
+        <label class="field">
+            <span>Source File</span>
+            <input id="dataset-file" type="file" name="file" accept=".csv" required>
+        </label>
+
+        <button id="preview-button" type="button" class="secondary-button">Preview Dataset</button>
+
+        <div id="preview-empty" class="empty-state">
+            Preview the file to unlock column selection, feature controls, and run settings.
+        </div>
+
+        <div id="preview-panel" class="preview-panel hidden">
+            <div class="preview-summary">
+                <div>
+                    <span class="summary-label">Records</span>
+                    <strong id="preview-rows">0</strong>
+                </div>
+                <div>
+                    <span class="summary-label">Fields</span>
+                    <strong id="preview-columns">0</strong>
+                </div>
+            </div>
+
+            <label class="field">
+                <span>Prediction Column</span>
+                <select id="target-column" name="target_column" required></select>
+            </label>
+
+            <div class="feature-mode-switch">
+                <label class="mode-card active" data-mode="auto">
+                    <input type="radio" name="feature_mode" value="auto" checked>
+                    <span>Auto Select</span>
+                    <small>Rank fields automatically and keep the strongest inputs.</small>
+                </label>
+                <label class="mode-card" data-mode="manual">
+                    <input type="radio" name="feature_mode" value="manual">
+                    <span>Manual Select</span>
+                    <small>Choose the exact input fields yourself.</small>
+                </label>
+            </div>
+
+            <div id="auto-panel" class="mode-panel">
+                <label class="field">
+                    <span>Feature Count</span>
+                    <input type="number" name="n_features" id="n-features" value="5" min="1">
+                </label>
+            </div>
+
+            <div id="manual-panel" class="mode-panel hidden">
+                <div class="field">
+                    <span>Input Fields</span>
+                    <div id="feature-list" class="feature-list"></div>
+                </div>
+            </div>
+
+            <div class="parameter-grid">
+                <label class="field">
+                    <span>Holdout Split</span>
+                    <input type="number" name="test_size" value="0.2" min="0.1" max="0.5" step="0.05">
+                </label>
+                <label class="field">
+                    <span>Seed</span>
+                    <input type="number" name="random_state" value="42" min="0">
+                </label>
+                <label class="field">
+                    <span>Models To Refine</span>
+                    <input type="number" name="top_k" value="3" min="1" max="5">
+                </label>
+                <label class="field">
+                    <span>Search Rounds</span>
+                    <input type="number" name="n_iter" value="5" min="1">
+                </label>
+                <label class="field">
+                    <span>Validation Folds</span>
+                    <input type="number" name="cv" value="3" min="2">
+                </label>
+            </div>
+
+            <div class="table-shell">
+                <div class="section-head compact">
+                    <h3>Data Preview</h3>
+                    <p>The first rows from the uploaded file.</p>
+                </div>
+                <div class="table-scroll">
+                    <table id="preview-table">
+                        <thead></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <button id="train-button" type="submit" class="primary-button" disabled>Run Training And Open Summary</button>
+    </form>
+
+    <aside class="studio-card info-card">
+        <div class="section-head">
+            <h2>What This Run Includes</h2>
+            <p>Each run is isolated, reproducible, and logged for later comparison.</p>
+        </div>
+        <ul class="feature-summary">
+            <li>Automatic holdout split from the uploaded file</li>
+            <li>Top three ranked models on the validation set</li>
+            <li>Side-by-side prediction review in a single summary view</li>
+            <li>Run history with saved settings and comparisons</li>
+        </ul>
+        <a class="secondary-button full-width-button" href="/experiments">Open Run History</a>
+    </aside>
+</section>
+
+<div id="loading-overlay" class="loading-overlay hidden">
+    <div class="loading-card">
+        <div class="spinner"></div>
+        <h3>Run In Progress</h3>
+        <p>Preparing data, training candidates, refining the shortlist, and logging the run details.</p>
+    </div>
+</div>
+{% endblock %}

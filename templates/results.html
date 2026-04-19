@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="results-hero">
+    <div>
+        <span class="eyebrow">Run {{ result.run_id }}</span>
+        <h1>Run summary for {{ result.target_column }}</h1>
+        <p>
+            Problem type: <strong>{{ result.task_type }}</strong>.
+            Best {{ result.metric_label }} score: <strong>{{ "%.4f"|format(result.best_score) }}</strong>.
+            Quality threshold: <strong>{{ "Passed" if result.threshold_passed else "Not met" }}</strong>.
+        </p>
+    </div>
+    <div class="header-actions">
+        <a class="secondary-button" href="/experiments">Run History</a>
+        <a class="secondary-button" href="/">Start Another Run</a>
+    </div>
+</section>
+
+<section class="metric-grid">
+    <article class="metric-card">
+        <span>Records</span>
+        <strong>{{ result.dataset_rows }}</strong>
+    </article>
+    <article class="metric-card">
+        <span>Fields</span>
+        <strong>{{ result.dataset_columns }}</strong>
+    </article>
+    <article class="metric-card">
+        <span>Prediction Field</span>
+        <strong>{{ result.target_column }}</strong>
+    </article>
+    <article class="metric-card">
+        <span>Selection Mode</span>
+        <strong>{{ result.feature_mode }}</strong>
+    </article>
+</section>
+
+<section class="results-grid">
+    <article class="dashboard-card">
+        <div class="section-head">
+            <h2>Top Models</h2>
+            <p>These are the best-ranked candidates on the holdout split.</p>
+        </div>
+        <div class="model-grid">
+            {% for model in result.comparison.top_models %}
+            <div class="model-card">
+                <div class="model-head">
+                    <h3>{{ model.display_name }}</h3>
+                    <span class="model-badge">{{ model.model_type }}</span>
+                </div>
+                <div class="score-line">
+                    <span>{{ result.metric_label }}</span>
+                    <strong>{{ "%.4f"|format(model.score) }}</strong>
+                </div>
+                <div class="score-bar">
+                    {% set width_value = ((model.score if model.score <= 1 else 1) * 100) if model.score > 0 else 0 %}
+                    <div style="width: {{ width_value }}%;"></div>
+                </div>
+                <dl class="metric-list">
+                    {% for metric_name, metric_value in model.metrics.items() %}
+                    <div>
+                        <dt>{{ metric_name }}</dt>
+                        <dd>{{ "%.4f"|format(metric_value) if metric_value is number else metric_value }}</dd>
+                    </div>
+                    {% endfor %}
+                </dl>
+            </div>
+            {% endfor %}
+        </div>
+    </article>
+
+    <article class="dashboard-card">
+        <div class="section-head">
+            <h2>Run Details</h2>
+            <p>This run is saved for later comparison and reruns.</p>
+        </div>
+        <div class="parameter-grid compact-grid">
+            {% for card in result.parameter_cards %}
+            <div class="parameter-card">
+                <span>{{ card.label }}</span>
+                <strong>{{ card.value }}</strong>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="meta-stack">
+            <div><strong>Source file:</strong> {{ result.dataset_name }}</div>
+            <div><strong>Created:</strong> {{ result.created_at }}</div>
+            <div><strong>Tracking group:</strong> {{ result.mlflow.experiment_name }}</div>
+            <div><strong>Tracking id:</strong> {{ result.mlflow.run_id or "Unavailable until mlflow is installed" }}</div>
+        </div>
+    </article>
+
+    <article class="dashboard-card">
+        <div class="section-head">
+            <h2>Prediction Review</h2>
+            <p>First 25 rows from the holdout split with actual values beside the top three model outputs.</p>
+        </div>
+        <div class="plot-stack">
+            {% for item in result.comparison.score_plot %}
+            <div class="plot-row">
+                <span>{{ item.label }}</span>
+                <div class="plot-bar"><div style="width: {{ item.width_pct }}%;"></div></div>
+                <strong>{{ "%.4f"|format(item.score) }}</strong>
+            </div>
+            {% endfor %}
+        </div>
+        {% if result.comparison.preview_rows %}
+        <div class="table-scroll">
+            <table>
+                <thead>
+                    <tr>
+                        {% for key in result.comparison.preview_rows[0].keys() %}
+                        <th>{{ key }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in result.comparison.preview_rows %}
+                    <tr>
+                        {% for value in row.values() %}
+                        <td>{{ value }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <p class="muted-copy">Showing {{ result.comparison.preview_rows|length }} of {{ result.comparison.row_count }} held-out rows.</p>
+        {% else %}
+        <p class="muted-copy">Prediction preview is not available for this run.</p>
+        {% endif %}
+    </article>
+
+    <article class="dashboard-card">
+        <div class="section-head">
+            <h2>Run A Variant</h2>
+            <p>Change the settings below and create a new tracked run from the same source file.</p>
+        </div>
+        <form class="rerun-form" action="/runs/{{ result.run_id }}/rerun" method="post">
+            <input type="hidden" name="target_column" value="{{ result.target_column }}">
+            <div class="feature-mode-switch">
+                <label class="mode-card {% if result.feature_mode == 'auto' %}active{% endif %}">
+                    <input type="radio" name="feature_mode" value="auto" {% if result.feature_mode == 'auto' %}checked{% endif %}>
+                    <span>Auto Select</span>
+                    <small>Use automatic field ranking again.</small>
+                </label>
+                <label class="mode-card {% if result.feature_mode == 'manual' %}active{% endif %}">
+                    <input type="radio" name="feature_mode" value="manual" {% if result.feature_mode == 'manual' %}checked{% endif %}>
+                    <span>Manual Select</span>
+                    <small>Reuse or adjust the selected input fields below.</small>
+                </label>
+            </div>
+            <div class="parameter-grid">
+                <label class="field">
+                    <span>Feature Count</span>
+                    <input type="number" name="n_features" value="{{ result.n_features }}" min="1">
+                </label>
+                <label class="field">
+                    <span>Holdout Split</span>
+                    <input type="number" name="test_size" value="{{ result.training_options.test_size }}" min="0.1" max="0.5" step="0.05">
+                </label>
+                <label class="field">
+                    <span>Seed</span>
+                    <input type="number" name="random_state" value="{{ result.training_options.random_state }}" min="0">
+                </label>
+                <label class="field">
+                    <span>Models To Refine</span>
+                    <input type="number" name="top_k" value="{{ result.training_options.top_k }}" min="1" max="5">
+                </label>
+                <label class="field">
+                    <span>Search Rounds</span>
+                    <input type="number" name="n_iter" value="{{ result.training_options.n_iter }}" min="1">
+                </label>
+                <label class="field">
+                    <span>Validation Folds</span>
+                    <input type="number" name="cv" value="{{ result.training_options.cv }}" min="2">
+                </label>
+            </div>
+            {% if result.selected_features %}
+            <div class="field">
+                <span>Selected Input Fields</span>
+                <div class="feature-list">
+                    {% for feature in result.selected_features %}
+                    <label class="feature-chip">
+                        <input type="checkbox" name="selected_features" value="{{ feature }}" checked>
+                        <span>{{ feature }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            <button type="submit" class="primary-button">Create New Run</button>
+        </form>
+    </article>
+
+    <article class="dashboard-card">
+        <div class="section-head">
+            <h2>Model Rankings</h2>
+            <p>Baseline and refined rankings for this run.</p>
+        </div>
+        <div class="table-scroll">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Stage</th>
+                        <th>Candidate</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in result.training_ranking %}
+                    <tr>
+                        <td>Baseline</td>
+                        <td>{{ item.model_name }}</td>
+                        <td>{{ "%.4f"|format(item.score) }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% for item in result.tuning_models %}
+                    <tr>
+                        <td>Refined</td>
+                        <td>{{ item.model_name }}</td>
+                        <td>{{ "%.4f"|format(item.ranking_score) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </article>
+</section>
+{% endblock %}

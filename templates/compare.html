@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="results-hero">
+    <div>
+        <span class="eyebrow">Compare</span>
+        <h1>Run comparison</h1>
+        <p>Side-by-side view of scores, settings, and top models for the selected runs.</p>
+    </div>
+    <a class="secondary-button" href="/experiments">Back To Run History</a>
+</section>
+
+<section class="results-grid">
+    <article class="dashboard-card">
+        <div class="section-head">
+            <h2>Score Comparison</h2>
+            <p>{{ comparison.metric_label }} across the selected runs.</p>
+        </div>
+        <div class="plot-stack">
+            {% for row in comparison.chart_rows %}
+            <div class="plot-row">
+                <span>{{ row.run_id }}</span>
+                <div class="plot-bar"><div style="width: {{ row.width_pct }}%;"></div></div>
+                <strong>{{ "%.4f"|format(row.best_score) }}</strong>
+            </div>
+            {% endfor %}
+        </div>
+    </article>
+
+    <article class="dashboard-card">
+        <div class="section-head">
+            <h2>Settings Snapshot</h2>
+            <p>Settings used for each run.</p>
+        </div>
+        <div class="table-scroll">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Parameter</th>
+                        {% for run in comparison.runs %}
+                        <th>{{ run.run_id }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in comparison.parameter_rows %}
+                    <tr>
+                        <td>{{ row.label }}</td>
+                        {% for value in row["values"] %}
+                        <td>{{ value }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </article>
+
+    {% for run in comparison.runs %}
+    <article class="dashboard-card">
+        <div class="section-head">
+            <h2>{{ run.run_id }}</h2>
+            <p>{{ run.dataset_name }} using {{ run.target_column }} as the prediction field.</p>
+        </div>
+        <div class="model-grid">
+            {% for model in run.comparison.top_models %}
+            <div class="model-card">
+                <div class="model-head">
+                    <h3>{{ model.display_name }}</h3>
+                    <span class="model-badge">{{ model.model_type }}</span>
+                </div>
+                <div class="score-line">
+                    <span>{{ run.metric_label }}</span>
+                    <strong>{{ "%.4f"|format(model.score) }}</strong>
+                </div>
+                <div class="score-bar">
+                    {% set width_value = ((model.score if model.score <= 1 else 1) * 100) if model.score > 0 else 0 %}
+                    <div style="width: {{ width_value }}%;"></div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </article>
+    {% endfor %}
+</section>
+{% endblock %}

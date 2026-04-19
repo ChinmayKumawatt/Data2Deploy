@@ -272,7 +272,6 @@ class ModelTuner:
         search_spaces = {
             "logistic_regression": {
                 "C": [0.01, 0.1, 1.0, 10.0, 100.0],
-                "penalty": ["l2"],
                 "solver": ["lbfgs", "newton-cg", "saga"],
                 "max_iter": [500, 1000, 1500],
             },

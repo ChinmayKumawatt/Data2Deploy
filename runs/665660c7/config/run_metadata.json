@@ -1,0 +1,31 @@
+{
+    "run_id": "665660c7",
+    "original_filename": "housing.csv",
+    "dataset_path": "C:\\Users\\chinm\\Desktop\\Data2Deploy\\runs\\665660c7\\input\\housing.csv",
+    "target_column": "median_house_value",
+    "feature_mode": "auto",
+    "selected_features": [],
+    "n_features": 7,
+    "task_type": "regression",
+    "training_options": {
+        "test_size": 0.3,
+        "random_state": 42,
+        "min_rows": 30,
+        "feature_selection_method": "mutual_info",
+        "numerical_imputation_strategy": "mean",
+        "categorical_imputation_strategy": "most_frequent",
+        "scaling_method": "standard",
+        "training_mode": "auto",
+        "model_list": [],
+        "top_k": 3,
+        "n_iter": 9,
+        "cv": 3,
+        "n_jobs": 1,
+        "minimum_performance_threshold": 0.1,
+        "overfitting_threshold": 0.1,
+        "missing_value_threshold": 0.35,
+        "drift_threshold": 0.6,
+        "imbalance_threshold": 0.9
+    },
+    "created_at": "2026-04-19T06:22:51.147664+00:00"
+}

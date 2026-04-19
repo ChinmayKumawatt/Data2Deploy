@@ -1,0 +1,235 @@
+{
+    "task_type": "regression",
+    "metric_label": "R2",
+    "top_models": [
+        {
+            "display_name": "lgbm_regressor",
+            "model_type": "tuned",
+            "score": 0.8380734348476844,
+            "metrics": {
+                "r2": 0.8380734348476844,
+                "mae": 30584.61211789024,
+                "rmse": 46101.53048250665
+            },
+            "model_path": "C:\\Users\\chinm\\Desktop\\Data2Deploy\\runs\\665660c7\\models\\tuning\\tuned_model_1.pkl"
+        },
+        {
+            "display_name": "catboost_regressor",
+            "model_type": "baseline",
+            "score": 0.8369308710401855,
+            "metrics": {
+                "r2": 0.8369308710401855,
+                "mae": 31300.238893339276,
+                "rmse": 46263.892195320936
+            },
+            "model_path": "C:\\Users\\chinm\\Desktop\\Data2Deploy\\runs\\665660c7\\models\\training\\model_1.pkl"
+        },
+        {
+            "display_name": "xgb_regressor",
+            "model_type": "tuned",
+            "score": 0.8359284043096716,
+            "metrics": {
+                "r2": 0.8359284043096716,
+                "mae": 30379.30572083939,
+                "rmse": 46405.877849317345
+            },
+            "model_path": "C:\\Users\\chinm\\Desktop\\Data2Deploy\\runs\\665660c7\\models\\tuning\\tuned_model_2.pkl"
+        }
+    ],
+    "preview_rows": [
+        {
+            "row_id": 1,
+            "actual": 47700.0,
+            "lgbm_regressor_prediction": 55319.1323,
+            "catboost_regressor_prediction": 58114.4159,
+            "xgb_regressor_prediction": 54670.13671875
+        },
+        {
+            "row_id": 2,
+            "actual": 45800.0,
+            "lgbm_regressor_prediction": 69267.4103,
+            "catboost_regressor_prediction": 70400.3639,
+            "xgb_regressor_prediction": 66412.7890625
+        },
+        {
+            "row_id": 3,
+            "actual": 500001.0,
+            "lgbm_regressor_prediction": 540691.2336,
+            "catboost_regressor_prediction": 495155.3941,
+            "xgb_regressor_prediction": 489867.5625
+        },
+        {
+            "row_id": 4,
+            "actual": 218600.0,
+            "lgbm_regressor_prediction": 277420.5048,
+            "catboost_regressor_prediction": 254643.0228,
+            "xgb_regressor_prediction": 268668.46875
+        },
+        {
+            "row_id": 5,
+            "actual": 278000.0,
+            "lgbm_regressor_prediction": 303380.279,
+            "catboost_regressor_prediction": 288620.4391,
+            "xgb_regressor_prediction": 289963.3125
+        },
+        {
+            "row_id": 6,
+            "actual": 158700.0,
+            "lgbm_regressor_prediction": 166075.8163,
+            "catboost_regressor_prediction": 175147.6843,
+            "xgb_regressor_prediction": 155225.765625
+        },
+        {
+            "row_id": 7,
+            "actual": 198200.0,
+            "lgbm_regressor_prediction": 210971.0777,
+            "catboost_regressor_prediction": 219293.8553,
+            "xgb_regressor_prediction": 202306.0625
+        },
+        {
+            "row_id": 8,
+            "actual": 157500.0,
+            "lgbm_regressor_prediction": 160296.38,
+            "catboost_regressor_prediction": 173632.8194,
+            "xgb_regressor_prediction": 162371.140625
+        },
+        {
+            "row_id": 9,
+            "actual": 340000.0,
+            "lgbm_regressor_prediction": 324225.8476,
+            "catboost_regressor_prediction": 292243.7683,
+            "xgb_regressor_prediction": 317541.09375
+        },
+        {
+            "row_id": 10,
+            "actual": 446600.0,
+            "lgbm_regressor_prediction": 450222.1688,
+            "catboost_regressor_prediction": 464965.01,
+            "xgb_regressor_prediction": 468265.90625
+        },
+        {
+            "row_id": 11,
+            "actual": 123200.0,
+            "lgbm_regressor_prediction": 122022.9489,
+            "catboost_regressor_prediction": 105639.6875,
+            "xgb_regressor_prediction": 144862.9375
+        },
+        {
+            "row_id": 12,
+            "actual": 253900.0,
+            "lgbm_regressor_prediction": 198306.977,
+            "catboost_regressor_prediction": 204642.0825,
+            "xgb_regressor_prediction": 218265.234375
+        },
+        {
+            "row_id": 13,
+            "actual": 215100.0,
+            "lgbm_regressor_prediction": 164406.1064,
+            "catboost_regressor_prediction": 174192.5259,
+            "xgb_regressor_prediction": 173708.609375
+        },
+        {
+            "row_id": 14,
+            "actual": 220500.0,
+            "lgbm_regressor_prediction": 214223.639,
+            "catboost_regressor_prediction": 198272.1265,
+            "xgb_regressor_prediction": 203690.125
+        },
+        {
+            "row_id": 15,
+            "actual": 219800.0,
+            "lgbm_regressor_prediction": 247472.7912,
+            "catboost_regressor_prediction": 247298.117,
+            "xgb_regressor_prediction": 255964.734375
+        },
+        {
+            "row_id": 16,
+            "actual": 136200.0,
+            "lgbm_regressor_prediction": 185630.9947,
+            "catboost_regressor_prediction": 206669.3293,
+            "xgb_regressor_prediction": 188584.921875
+        },
+        {
+            "row_id": 17,
+            "actual": 178400.0,
+            "lgbm_regressor_prediction": 185136.2545,
+            "catboost_regressor_prediction": 179320.7109,
+            "xgb_regressor_prediction": 173416.3125
+        },
+        {
+            "row_id": 18,
+            "actual": 187500.0,
+            "lgbm_regressor_prediction": 160201.0409,
+            "catboost_regressor_prediction": 142061.203,
+            "xgb_regressor_prediction": 159025.46875
+        },
+        {
+            "row_id": 19,
+            "actual": 139800.0,
+            "lgbm_regressor_prediction": 132236.2519,
+            "catboost_regressor_prediction": 147600.085,
+            "xgb_regressor_prediction": 137551.984375
+        },
+        {
+            "row_id": 20,
+            "actual": 137500.0,
+            "lgbm_regressor_prediction": 90042.6836,
+            "catboost_regressor_prediction": 88953.3953,
+            "xgb_regressor_prediction": 89670.2890625
+        },
+        {
+            "row_id": 21,
+            "actual": 425000.0,
+            "lgbm_regressor_prediction": 356519.563,
+            "catboost_regressor_prediction": 374607.6323,
+            "xgb_regressor_prediction": 345836.3125
+        },
+        {
+            "row_id": 22,
+            "actual": 405600.0,
+            "lgbm_regressor_prediction": 464094.6897,
+            "catboost_regressor_prediction": 420377.1486,
+            "xgb_regressor_prediction": 455397.84375
+        },
+        {
+            "row_id": 23,
+            "actual": 138800.0,
+            "lgbm_regressor_prediction": 144214.0543,
+            "catboost_regressor_prediction": 142288.0402,
+            "xgb_regressor_prediction": 158604.296875
+        },
+        {
+            "row_id": 24,
+            "actual": 500001.0,
+            "lgbm_regressor_prediction": 423862.9454,
+            "catboost_regressor_prediction": 413372.6724,
+            "xgb_regressor_prediction": 420947.6875
+        },
+        {
+            "row_id": 25,
+            "actual": 162100.0,
+            "lgbm_regressor_prediction": 172332.5289,
+            "catboost_regressor_prediction": 178979.4265,
+            "xgb_regressor_prediction": 169928.484375
+        }
+    ],
+    "row_count": 6192,
+    "prediction_csv_path": "C:\\Users\\chinm\\Desktop\\Data2Deploy\\runs\\665660c7\\results\\prediction_comparison.csv",
+    "score_plot": [
+        {
+            "label": "lgbm_regressor",
+            "score": 0.8380734348476844,
+            "width_pct": 83.80734348476844
+        },
+        {
+            "label": "catboost_regressor",
+            "score": 0.8369308710401855,
+            "width_pct": 83.69308710401855
+        },
+        {
+            "label": "xgb_regressor",
+            "score": 0.8359284043096716,
+            "width_pct": 83.59284043096716
+        }
+    ]
+}

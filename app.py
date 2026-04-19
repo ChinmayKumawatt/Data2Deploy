@@ -1,122 +1,206 @@
-import os
-import shutil
-from fastapi import FastAPI, BackgroundTasks, File, UploadFile, Form, HTTPException
-from fastapi.responses import HTMLResponse
-import pprint
+from pathlib import Path
 
-# Import the core logic from our dynamically created module
-from src.automl_runner import setup_automl_run
+from fastapi import FastAPI, File, Form, HTTPException, Query, Request, UploadFile
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 
-app = FastAPI(title="AutoML Pipeline API", description="REST endpoints for triggering the Data2Deploy ML pipeline.", version="1.0.0")
-
-# Create data dir if it doesn't exist
-DATA_DIR = "data"
-os.makedirs(DATA_DIR, exist_ok=True)
-
-
-def background_automl_task(dataset_path: str, target_column: str, feature_mode: str, n_features: int):
-    """
-    Executes the DVC pipeline in the background so the HTTP response is not blocked.
-    """
-    try:
-        print(f"[API] Starting background AutoML task for dataset: {dataset_path}")
-        setup_automl_run(
-            csv_path=dataset_path,
-            target_column=target_column,
-            feature_mode=feature_mode,
-            n_features=n_features
-        )
-        print("[API] Background AutoML task completed successfully.")
-    except Exception as e:
-        print(f"[API] Background AutoML task failed: {str(e)}")
+from src.services.automl_service import (
+    get_experiment_compare_payload,
+    list_run_summaries,
+    load_run_summary,
+    preview_dataset,
+    rerun_existing_experiment,
+    run_training_pipeline,
+)
 
 
-@app.post("/train")
-async def trigger_training(
-    background_tasks: BackgroundTasks,
-    file: UploadFile = File(...),
-    target_column: str = Form(..., description="The name of the target column to predict"),
-    feature_mode: str = Form("auto", description="Either 'auto' or 'manual'"),
-    n_features: int = Form(5, description="Number of features to auto-select")
-):
-    """
-    Endpoint that accepts a CSV dataset, saves it, and fires off the DVC pipeline in the background.
-    """
-    if not file.filename.endswith('.csv'):
-        raise HTTPException(status_code=400, detail="Only .csv files are supported.")
+BASE_DIR = Path(__file__).resolve().parent
+templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
-    file_path = os.path.join(DATA_DIR, file.filename)
+app = FastAPI(
+    title="Data2Deploy AutoML Studio",
+    description="Upload a dataset, train top models, compare predictions, and track experiments with MLflow.",
+    version="3.0.0",
+)
+app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
 
-    # Save the file to disk
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
 
-    # Trigger background execution
-    background_tasks.add_task(
-        background_automl_task,
-        dataset_path=file_path,
-        target_column=target_column,
-        feature_mode=feature_mode,
-        n_features=n_features
+def _render(request: Request, name: str, context: dict, status_code: int = 200):
+    return templates.TemplateResponse(
+        request=request,
+        name=name,
+        context={"request": request, **context},
+        status_code=status_code,
     )
-
-    return {
-        "status": "success",
-        "message": "Dataset uploaded successfully. AutoML pipeline has been triggered in the background.",
-        "details": {
-            "dataset_path": file_path,
-            "target_column": target_column,
-            "feature_mode": feature_mode,
-            "n_features": n_features
-        }
-    }
 
 
 @app.get("/", response_class=HTMLResponse)
-async def serve_ui():
-    """
-    A simple web UI to upload the CSV manually for testing.
-    """
-    html_content = """
-    <html>
-        <head>
-            <title>AutoML Predictor Portal</title>
-            <style>
-                body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-                .container { background-color: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
-                h1 { color: #333; margin-bottom: 5px; }
-                p { color: #666; font-size: 14px; margin-bottom: 25px; }
-                label { display: block; margin-top: 15px; font-weight: 600; color: #444; }
-                input[type="text"], input[type="number"], select { width: 100%; padding: 10px; margin-top: 5px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; }
-                input[type="file"] { margin-top: 10px; }
-                input[type="submit"] { margin-top: 30px; background-color: #007bff; color: white; border: none; padding: 12px; width: 100%; border-radius: 6px; font-size: 16px; cursor: pointer; transition: 0.3s; }
-                input[type="submit"]:hover { background-color: #0056b3; }
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <h1>AutoML Studio</h1>
-                <p>Upload a dataset and let the pipeline figure it out.</p>
-                <form action="/train" enctype="multipart/form-data" method="post" target="_blank">
-                    <label>CSV Dataset File:</label>
-                    <input name="file" type="file" accept=".csv" required>
+async def serve_ui(request: Request, error: str | None = None):
+    return _render(
+        request,
+        "index.html",
+        {
+            "title": "Data2Deploy AutoML Studio",
+            "error": error,
+            "experiments_count": len(list_run_summaries()),
+        },
+    )
 
-                    <label>Target Column Name:</label>
-                    <input name="target_column" type="text" placeholder="e.g. target, Price, etc" required>
 
-                    <label>Feature Mode:</label>
-                    <select name="feature_mode">
-                        <option value="auto">Auto</option>
-                        <option value="manual">Manual (All but target)</option>
-                    </select>
+@app.post("/preview")
+async def dataset_preview(file: UploadFile = File(...)):
+    if not file.filename or not file.filename.lower().endswith(".csv"):
+        raise HTTPException(status_code=400, detail="Only .csv files are supported.")
 
-                    <label>Number of Features (Auto mode only):</label>
-                    <input name="n_features" type="number" value="5">
+    try:
+        file_bytes = await file.read()
+        return JSONResponse(preview_dataset(file_bytes))
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
-                    <input type="submit" value="Start Pipeline Training">
-                </form>
-            </div>
-        </body>
-    </html>
-    """
-    return html_content
+
+@app.post("/train", response_class=HTMLResponse)
+async def trigger_training(
+    request: Request,
+    file: UploadFile = File(...),
+    target_column: str = Form(...),
+    feature_mode: str = Form("auto"),
+    n_features: int = Form(5),
+    selected_features: list[str] = Form(default=[]),
+    test_size: float = Form(0.2),
+    random_state: int = Form(42),
+    top_k: int = Form(3),
+    n_iter: int = Form(5),
+    cv: int = Form(3),
+):
+    if not file.filename or not file.filename.lower().endswith(".csv"):
+        raise HTTPException(status_code=400, detail="Only .csv files are supported.")
+
+    try:
+        result = run_training_pipeline(
+            file_bytes=await file.read(),
+            filename=file.filename,
+            target_column=target_column,
+            feature_mode=feature_mode,
+            n_features=n_features,
+            selected_features=selected_features,
+            training_options={
+                "test_size": test_size,
+                "random_state": random_state,
+                "top_k": top_k,
+                "n_iter": n_iter,
+                "cv": cv,
+            },
+        )
+        return _render(
+            request,
+            "results.html",
+            {
+                "title": f"Run {result['run_id']} Dashboard",
+                "result": result,
+            },
+        )
+    except Exception as exc:
+        return _render(
+            request,
+            "index.html",
+            {
+                "title": "Data2Deploy AutoML Studio",
+                "error": str(exc),
+                "experiments_count": len(list_run_summaries()),
+            },
+            status_code=400,
+        )
+
+
+@app.get("/runs/{run_id}", response_class=HTMLResponse)
+async def view_run(request: Request, run_id: str):
+    try:
+        result = load_run_summary(run_id)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    return _render(
+        request,
+        "results.html",
+        {
+            "title": f"Run {run_id} Dashboard",
+            "result": result,
+        },
+    )
+
+
+@app.post("/runs/{run_id}/rerun", response_class=HTMLResponse)
+async def rerun_experiment(
+    request: Request,
+    run_id: str,
+    target_column: str = Form(...),
+    feature_mode: str = Form(...),
+    n_features: int = Form(5),
+    selected_features: list[str] = Form(default=[]),
+    test_size: float = Form(0.2),
+    random_state: int = Form(42),
+    top_k: int = Form(3),
+    n_iter: int = Form(5),
+    cv: int = Form(3),
+):
+    try:
+        result = rerun_existing_experiment(
+            source_run_id=run_id,
+            target_column=target_column,
+            feature_mode=feature_mode,
+            n_features=n_features,
+            selected_features=selected_features,
+            training_options={
+                "test_size": test_size,
+                "random_state": random_state,
+                "top_k": top_k,
+                "n_iter": n_iter,
+                "cv": cv,
+            },
+        )
+        return _render(
+            request,
+            "results.html",
+            {
+                "title": f"Run {result['run_id']} Dashboard",
+                "result": result,
+            },
+        )
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.get("/experiments", response_class=HTMLResponse)
+async def experiments_page(request: Request):
+    experiments = list_run_summaries()
+    return _render(
+        request,
+        "experiments.html",
+        {
+            "title": "Experiments",
+            "experiments": experiments,
+        },
+    )
+
+
+@app.get("/experiments/compare", response_class=HTMLResponse)
+async def compare_experiments(request: Request, run_ids: list[str] = Query(default=[])):
+    if not run_ids:
+        return RedirectResponse(url="/experiments", status_code=302)
+
+    payload = get_experiment_compare_payload(run_ids)
+    return _render(
+        request,
+        "compare.html",
+        {
+            "title": "Compare Experiments",
+            "comparison": payload,
+        },
+    )
+
+
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}
