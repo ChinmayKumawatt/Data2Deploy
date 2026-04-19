@@ -39,6 +39,7 @@
                     </div>
                 </div>
                 <a class="secondary-button small-button" href="/runs/{{ experiment.run_id }}">View</a>
+                <button type="button" class="delete-button small-button" onclick="deleteRun('{{ experiment.run_id }}')">Delete</button>
             </label>
             {% endfor %}
         </div>
@@ -50,4 +51,32 @@
         {% endif %}
     </form>
 </section>
+
+<script>
+async function deleteRun(runId) {
+    if (!confirm(`Are you sure you want to delete run ${runId}? This action cannot be undone.`)) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/runs/${runId}/delete`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            alert(`Error deleting run: ${error.detail || 'Unknown error'}`);
+            return;
+        }
+        
+        // Reload the page to refresh the run list
+        window.location.reload();
+    } catch (error) {
+        alert(`Error deleting run: ${error.message}`);
+    }
+}
+</script>
 {% endblock %}

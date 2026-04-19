@@ -158,4 +158,12 @@
         loadingOverlay.classList.remove("hidden");
         trainButton.disabled = true;
     });
+
+    // Handle rerun form loading overlay
+    const rerunForm = document.querySelector(".rerun-form");
+    if (rerunForm) {
+        rerunForm.addEventListener("submit", () => {
+            loadingOverlay.classList.remove("hidden");
+        });
+    }
 })();

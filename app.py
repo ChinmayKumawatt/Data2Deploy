@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from fastapi import FastAPI, File, Form, HTTPException, Query, Request, UploadFile
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -13,6 +13,7 @@ from src.services.automl_service import (
     rerun_existing_experiment,
     run_training_pipeline,
 )
+from src.services.container_service import create_container_package
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -199,6 +200,116 @@ async def compare_experiments(request: Request, run_ids: list[str] = Query(defau
             "comparison": payload,
         },
     )
+
+
+
+
+@app.get("/runs/{run_id}/download-app")
+async def download_containerized_app(run_id: str, model_index: int = 0):
+    """
+    Download a containerized ML application with the selected trained model.
+    
+    Args:
+        run_id: The training run ID
+        model_index: Index of the model to download (0 = best model)
+    """
+    import tempfile
+    import io
+    
+    try:
+        # Load run summary
+        summary = load_run_summary(run_id)
+        
+        # Get model information
+        evaluation_models = summary.get("evaluation_models", [])
+        if not evaluation_models or model_index >= len(evaluation_models):
+            raise HTTPException(status_code=400, detail="Invalid model index")
+        
+        selected_model = evaluation_models[model_index]
+        model_path = selected_model["model_path"]
+        model_name = selected_model.get("model_name", "trained_model")
+        
+        # Get preprocessor path
+        run_dir = Path(summary.get("dataset_path", "")).parent.parent
+        preprocessor_path = run_dir / "artifacts" / "data_transformation" / "preprocessor.pkl"
+        
+        if not Path(model_path).exists():
+            raise HTTPException(status_code=400, detail="Model file not found")
+        if not preprocessor_path.exists():
+            raise HTTPException(status_code=400, detail="Preprocessor file not found")
+        
+        # Get training data structure
+        run_summary_path = Path(f"runs/{run_id}/results/summary.json")
+        import json
+        with open(run_summary_path) as f:
+            run_data = json.load(f)
+        
+        # Get feature names from comparison data
+        comparison = run_data.get("comparison", {})
+        top_models = comparison.get("top_models", [])
+        
+        if not top_models:
+            raise HTTPException(status_code=400, detail="Could not determine features")
+        
+        # Get feature names from the first prediction row
+        preview_rows = comparison.get("preview_rows", [])
+        if preview_rows:
+            feature_names = [key for key in preview_rows[0].keys() if key not in ["row_id", "actual"]]
+            # Filter out model prediction columns
+            feature_names = [f for f in feature_names if not f.endswith("_prediction")]
+        else:
+            feature_names = []
+        
+        # Create container package
+        package_bytes = create_container_package(
+            run_id=run_id,
+            model_path=model_path,
+            preprocessor_path=str(preprocessor_path),
+            target_column=summary["target_column"],
+            task_type=summary["task_type"],
+            feature_names=feature_names,
+            model_name=model_name
+        )
+        
+        # Save to temporary file and return
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".zip") as tmp:
+            tmp.write(package_bytes)
+            tmp_path = tmp.name
+        
+        filename = f"ml-model-{run_id[:8]}.zip"
+        return FileResponse(
+            path=tmp_path,
+            media_type="application/zip",
+            filename=filename,
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
+
+
+@app.post("/runs/{run_id}/delete")
+async def delete_run(run_id: str):
+    """Delete a run and all its associated files."""
+    try:
+        import shutil
+        run_dir = Path(f"runs/{run_id}")
+        
+        if not run_dir.exists():
+            raise HTTPException(status_code=404, detail="Run not found")
+        
+        # Delete the run directory and all its contents
+        shutil.rmtree(run_dir)
+        
+        return JSONResponse(
+            status_code=200,
+            content={"message": f"Run {run_id} deleted successfully"}
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.get("/health")

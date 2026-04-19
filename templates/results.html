@@ -65,6 +65,9 @@
                     </div>
                     {% endfor %}
                 </dl>
+                <a href="/runs/{{ result.run_id }}/download-app?model_index={{ loop.index0 }}" class="download-button" title="Download this model as a containerized app">
+                    Download as Docker App
+                </a>
             </div>
             {% endfor %}
         </div>

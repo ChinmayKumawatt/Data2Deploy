@@ -3,22 +3,21 @@
 {% block content %}
 <section class="hero-card">
     <div class="hero-copy">
-        <span class="eyebrow">Model Studio</span>
-        <h1>Build, track, and compare model runs from a single data upload.</h1>
+        <span class="eyebrow">AutoML Studio</span>
+        <h1>Train multiple models in minutes</h1>
         <p>
-            Upload a tabular dataset, choose the prediction column, decide how features should be selected,
-            and review held-out predictions from the top three models. Every run is also tracked so you can compare
-            settings and results over time.
+            Upload your CSV, select a target column, and automatically compare top machine learning models. 
+            Track all runs with detailed metrics and predictions.
         </p>
     </div>
     <div class="hero-panel">
         <div class="stat-pill">
-            <strong>Workflow</strong>
-            <span>Quality checks, preprocessing, training, tuning, evaluation</span>
+            <span class="summary-label">Workflow</span>
+            <strong>5-Stage Pipeline</strong>
         </div>
         <div class="stat-pill">
-            <strong>Saved Runs</strong>
-            <span>{{ experiments_count }} stored runs ready for comparison</span>
+            <span class="summary-label">Saved Runs</span>
+            <strong>{{ experiments_count }}</strong>
         </div>
     </div>
 </section>
@@ -31,7 +30,7 @@
     <form id="train-form" class="studio-card" action="/train" method="post" enctype="multipart/form-data">
         <div class="section-head">
             <h2>Run Setup</h2>
-            <p>Preview the data first, then choose the prediction column, feature strategy, and run settings.</p>
+            <p>Upload a CSV file and configure your training run in just a few steps.</p>
         </div>
 
         <label class="field">
@@ -42,7 +41,7 @@
         <button id="preview-button" type="button" class="secondary-button">Preview Dataset</button>
 
         <div id="preview-empty" class="empty-state">
-            Preview the file to unlock column selection, feature controls, and run settings.
+            Preview your CSV file to unlock configuration options and see data summary.
         </div>
 
         <div id="preview-panel" class="preview-panel hidden">
@@ -58,7 +57,7 @@
             </div>
 
             <label class="field">
-                <span>Prediction Column</span>
+                <span>Target Column</span>
                 <select id="target-column" name="target_column" required></select>
             </label>
 
@@ -66,56 +65,56 @@
                 <label class="mode-card active" data-mode="auto">
                     <input type="radio" name="feature_mode" value="auto" checked>
                     <span>Auto Select</span>
-                    <small>Rank fields automatically and keep the strongest inputs.</small>
+                    <small>Our algorithm ranks and selects the strongest features.</small>
                 </label>
                 <label class="mode-card" data-mode="manual">
                     <input type="radio" name="feature_mode" value="manual">
                     <span>Manual Select</span>
-                    <small>Choose the exact input fields yourself.</small>
+                    <small>You choose which features to use.</small>
                 </label>
             </div>
 
             <div id="auto-panel" class="mode-panel">
                 <label class="field">
-                    <span>Feature Count</span>
-                    <input type="number" name="n_features" id="n-features" value="5" min="1">
+                    <span>Number of Features</span>
+                    <input type="number" name="n_features" id="n-features" value="5" min="1" max="50">
                 </label>
             </div>
 
             <div id="manual-panel" class="mode-panel hidden">
                 <div class="field">
-                    <span>Input Fields</span>
+                    <span>Select Features</span>
                     <div id="feature-list" class="feature-list"></div>
                 </div>
             </div>
 
             <div class="parameter-grid">
                 <label class="field">
-                    <span>Holdout Split</span>
+                    <span>Test Split %</span>
                     <input type="number" name="test_size" value="0.2" min="0.1" max="0.5" step="0.05">
                 </label>
                 <label class="field">
-                    <span>Seed</span>
+                    <span>Random Seed</span>
                     <input type="number" name="random_state" value="42" min="0">
                 </label>
                 <label class="field">
-                    <span>Models To Refine</span>
+                    <span>Top Models to Tune</span>
                     <input type="number" name="top_k" value="3" min="1" max="5">
                 </label>
                 <label class="field">
-                    <span>Search Rounds</span>
-                    <input type="number" name="n_iter" value="5" min="1">
+                    <span>Tuning Iterations</span>
+                    <input type="number" name="n_iter" value="5" min="1" max="20">
                 </label>
                 <label class="field">
-                    <span>Validation Folds</span>
-                    <input type="number" name="cv" value="3" min="2">
+                    <span>CV Folds</span>
+                    <input type="number" name="cv" value="3" min="2" max="10">
                 </label>
             </div>
 
             <div class="table-shell">
                 <div class="section-head compact">
                     <h3>Data Preview</h3>
-                    <p>The first rows from the uploaded file.</p>
+                    <p>First 8 rows of your file.</p>
                 </div>
                 <div class="table-scroll">
                     <table id="preview-table">
@@ -126,21 +125,23 @@
             </div>
         </div>
 
-        <button id="train-button" type="submit" class="primary-button" disabled>Run Training And Open Summary</button>
+        <button id="train-button" type="submit" class="primary-button" disabled>Start Training</button>
     </form>
 
     <aside class="studio-card info-card">
         <div class="section-head">
-            <h2>What This Run Includes</h2>
-            <p>Each run is isolated, reproducible, and logged for later comparison.</p>
+            <h2>What Happens</h2>
+            <p>Your run will go through a 5-stage ML pipeline.</p>
         </div>
         <ul class="feature-summary">
-            <li>Automatic holdout split from the uploaded file</li>
-            <li>Top three ranked models on the validation set</li>
-            <li>Side-by-side prediction review in a single summary view</li>
-            <li>Run history with saved settings and comparisons</li>
+            <li><strong>Data Ingestion</strong> - Load and split your dataset</li>
+            <li><strong>Validation</strong> - Check data quality and schema</li>
+            <li><strong>Transformation</strong> - Engineer and scale features</li>
+            <li><strong>Training</strong> - Train multiple models</li>
+            <li><strong>Tuning</strong> - Optimize top performers</li>
+            <li><strong>Evaluation</strong> - Select the best model</li>
         </ul>
-        <a class="secondary-button full-width-button" href="/experiments">Open Run History</a>
+        <a class="secondary-button full-width-button" href="/experiments">View Run History</a>
     </aside>
 </section>
 
