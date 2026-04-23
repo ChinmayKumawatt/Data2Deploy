@@ -1,0 +1,810 @@
+{% extends "base.html" %}
+
+{% block content %}
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+<section class="results-hero">
+    <div>
+        <span class="eyebrow">Insight Studio</span>
+        <h1>Exploratory Data Analysis</h1>
+        <p>Discover data patterns, detect insights, and get feature engineering recommendations.</p>
+    </div>
+    <div class="header-actions">
+        <a class="secondary-button" href="/experiments">Run History</a>
+        <a class="secondary-button" href="/">Start New Run</a>
+    </div>
+</section>
+
+<!-- Tabs Navigation -->
+<div class="insight-tabs">
+    <button class="tab-button active" data-tab="overview">Data Overview</button>
+    <button class="tab-button" data-tab="statistics">Statistics</button>
+    <button class="tab-button" data-tab="insights">Insights</button>
+    <button class="tab-button" data-tab="plot-builder">Plot Builder</button>
+    <button class="tab-button" data-tab="recommendations">Recommendations</button>
+</div>
+
+<!-- Data Overview Tab -->
+<section id="overview" class="tab-content active">
+    <article class="dashboard-card">
+        <div class="section-head">
+            <h2>Dataset Overview</h2>
+            <p>Basic information about your dataset.</p>
+        </div>
+        <div class="overview-grid">
+            <div class="metric-card">
+                <span>Rows</span>
+                <strong id="rows-count">-</strong>
+            </div>
+            <div class="metric-card">
+                <span>Columns</span>
+                <strong id="cols-count">-</strong>
+            </div>
+            <div class="metric-card">
+                <span>Memory Usage</span>
+                <strong id="memory-usage">-</strong>
+            </div>
+            <div class="metric-card">
+                <span>Duplicates</span>
+                <strong id="duplicates-count">-</strong>
+            </div>
+        </div>
+
+        <h3>Column Information</h3>
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Column</th>
+                        <th>Data Type</th>
+                        <th>Missing Values</th>
+                        <th>Missing %</th>
+                        <th>Unique Values</th>
+                    </tr>
+                </thead>
+                <tbody id="columns-table">
+                    <tr><td colspan="5">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Data Preview</h3>
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead id="preview-header">
+                    <tr><th>Loading...</th></tr>
+                </thead>
+                <tbody id="preview-body">
+                    <tr><td>Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </article>
+</section>
+
+<!-- Statistics Tab -->
+<section id="statistics" class="tab-content">
+    <div class="stat-grid">
+        <article class="dashboard-card">
+            <div class="section-head">
+                <h2>Numeric Statistics</h2>
+                <p>Summary statistics for numeric columns.</p>
+            </div>
+            <div class="table-wrapper">
+                <table class="data-table stat-table">
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th>Mean</th>
+                            <th>Std Dev</th>
+                            <th>Min</th>
+                            <th>25%</th>
+                            <th>Median</th>
+                            <th>75%</th>
+                            <th>Max</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stats-table">
+                        <tr><td colspan="8">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </article>
+
+        <article class="dashboard-card">
+            <div class="section-head">
+                <h2>Categorical Summary</h2>
+                <p>Value counts for categorical columns.</p>
+            </div>
+            <div id="categorical-summary">
+                <p>Loading...</p>
+            </div>
+        </article>
+    </div>
+
+    <article class="dashboard-card">
+        <div class="section-head">
+            <h2>Correlation Matrix</h2>
+            <p>Pearson correlation between numeric features.</p>
+        </div>
+        <div id="correlation-matrix" class="correlation-heatmap">
+            <p>Loading...</p>
+        </div>
+    </article>
+</section>
+
+<!-- Insights Tab -->
+<section id="insights" class="tab-content">
+    <div class="insights-grid">
+        <article class="dashboard-card">
+            <div class="section-head">
+                <h2>Outliers Detected</h2>
+                <p>Features with outlier values (IQR method).</p>
+            </div>
+            <div id="outliers-list">
+                <p class="muted-copy">No outliers detected.</p>
+            </div>
+        </article>
+
+        <article class="dashboard-card">
+            <div class="section-head">
+                <h2>Skewed Distributions</h2>
+                <p>Features with significant skewness.</p>
+            </div>
+            <div id="skewness-list">
+                <p class="muted-copy">No significant skewness detected.</p>
+            </div>
+        </article>
+
+        <article class="dashboard-card">
+            <div class="section-head">
+                <h2>Strong Correlations</h2>
+                <p>Feature pairs with high correlation (>0.7).</p>
+            </div>
+            <div id="correlations-list">
+                <p class="muted-copy">No strong correlations detected.</p>
+            </div>
+        </article>
+
+        <article class="dashboard-card">
+            <div class="section-head">
+                <h2>Constant Features</h2>
+                <p>Features with constant or near-constant values.</p>
+            </div>
+            <div id="constant-list">
+                <p class="muted-copy">No constant features detected.</p>
+            </div>
+        </article>
+    </div>
+</section>
+
+<!-- Plot Builder Tab -->
+<section id="plot-builder" class="tab-content">
+    <article class="dashboard-card">
+        <div class="section-head">
+            <h2>Interactive Plot Builder</h2>
+            <p>Create custom visualizations of your data.</p>
+        </div>
+
+        <div class="plot-builder-form">
+            <div class="form-group">
+                <label for="plot-type">Plot Type</label>
+                <select id="plot-type">
+                    <option value="">Select a plot type...</option>
+                    <option value="histogram">Histogram</option>
+                    <option value="scatter">Scatter Plot</option>
+                    <option value="boxplot">Box Plot</option>
+                    <option value="bar">Bar Chart</option>
+                    <option value="heatmap">Correlation Heatmap</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="plot-x">X-Axis Feature</label>
+                <select id="plot-x">
+                    <option value="">Select feature...</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="plot-y-group" style="display: none;">
+                <label for="plot-y">Y-Axis Feature</label>
+                <select id="plot-y">
+                    <option value="">Select feature (optional)...</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="plot-group-group" style="display: none;">
+                <label for="plot-group">Group By (optional)</label>
+                <select id="plot-group">
+                    <option value="">None</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="heatmap-features-group" style="display: none;">
+                <label for="heatmap-features">Select Features for Heatmap</label>
+                <div class="feature-list" id="heatmap-features">
+                    <p style="color: var(--text-muted); font-size: 12px;">Select features (numeric only)</p>
+                </div>
+            </div>
+
+            <button id="generate-plot-btn" class="primary-button">Generate Plot</button>
+        </div>
+
+        <div id="plot-suggestions">
+            <h3>Suggested Plots</h3>
+            <div class="suggestions-container">
+                <div id="univariate-suggestions"></div>
+                <div id="bivariate-suggestions"></div>
+                <div id="multivariate-suggestions"></div>
+            </div>
+        </div>
+    </article>
+
+    <article class="dashboard-card" id="plot-output" style="display: none;">
+        <div class="section-head">
+            <h2 id="plot-title">Plot</h2>
+        </div>
+        <div id="plot-container" style="height: 600px; width: 100%; position: relative;">
+            <p>Loading plot...</p>
+        </div>
+    </article>
+</section>
+
+<!-- Recommendations Tab -->
+<section id="recommendations" class="tab-content">
+    <article class="dashboard-card">
+        <div class="section-head">
+            <h2>Feature Engineering Recommendations</h2>
+            <p>AI-driven suggestions based on detected insights.</p>
+        </div>
+        <div id="recommendations-list">
+            <p>Loading recommendations...</p>
+        </div>
+    </article>
+</section>
+
+<script>
+    // Tab switching
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.addEventListener('click', function() {
+            const tabName = this.getAttribute('data-tab');
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(tabName).classList.add('active');
+            this.classList.add('active');
+        });
+    });
+
+    // Load EDA data on page load
+    document.addEventListener('DOMContentLoaded', async function() {
+        try {
+            // Load all insights
+            const overviewResp = await fetch('/api/eda/overview');
+            if (!overviewResp.ok) throw new Error('Failed to load overview');
+            const overview = await overviewResp.json();
+            populateOverview(overview);
+
+            const statsResp = await fetch('/api/eda/statistics');
+            if (!statsResp.ok) throw new Error('Failed to load statistics');
+            const stats = await statsResp.json();
+            populateStatistics(stats);
+
+            const insightsResp = await fetch('/api/eda/insights');
+            if (!insightsResp.ok) throw new Error('Failed to load insights');
+            const insights = await insightsResp.json();
+            populateInsights(insights);
+
+            const recommendationsResp = await fetch('/api/eda/recommendations');
+            if (!recommendationsResp.ok) throw new Error('Failed to load recommendations');
+            const recommendations = await recommendationsResp.json();
+            populateRecommendations(recommendations);
+
+            const plotsResp = await fetch('/api/eda/plot-suggestions');
+            if (!plotsResp.ok) throw new Error('Failed to load plot suggestions');
+            const plots = await plotsResp.json();
+            populatePlotSuggestions(plots);
+
+            // Populate dropdowns
+            const columnsResp = await fetch('/api/eda/columns');
+            if (!columnsResp.ok) throw new Error('Failed to load columns');
+            const columns = await columnsResp.json();
+            populateColumnSelectors(columns);
+        } catch (error) {
+            console.error('Error loading EDA data:', error);
+            document.body.innerHTML = '<div style="padding: 20px; color: red;"><h2>Error Loading Data</h2><p>' + error.message + '</p><p>Make sure you have a dataset loaded or came from a run results page.</p></div>';
+        }
+    });
+
+    function populateOverview(data) {
+        if (!data.overview || !data.preview) {
+            console.error('Invalid overview data:', data);
+            return;
+        }
+
+        document.getElementById('rows-count').textContent = data.overview.shape.rows.toLocaleString();
+        document.getElementById('cols-count').textContent = data.overview.shape.columns.toLocaleString();
+        document.getElementById('memory-usage').textContent = data.overview.memory_usage_mb.toFixed(2) + ' MB';
+        document.getElementById('duplicates-count').textContent = data.overview.duplicates + ` (${data.overview.duplicate_pct.toFixed(2)}%)`;
+
+        // Populate columns table
+        const preview = data.preview;
+        const table = document.getElementById('columns-table');
+        table.innerHTML = '';
+
+        const dtypes = data.overview.dtypes;
+        const missing = data.overview.missing_values;
+
+        for (const [col, dtype] of Object.entries(dtypes)) {
+            const missingInfo = missing[col] || { count: 0, percentage: 0 };
+            const uniqueCount = preview.data.reduce((set, row) => {
+                const idx = preview.columns.indexOf(col);
+                if (idx >= 0) set.add(row[idx]);
+                return set;
+            }, new Set()).size;
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><strong>${col}</strong></td>
+                <td>${dtype}</td>
+                <td>${missingInfo.count}</td>
+                <td>${missingInfo.percentage.toFixed(2)}%</td>
+                <td>${uniqueCount}</td>
+            `;
+            table.appendChild(row);
+        }
+
+        // Populate preview table
+        const headerRow = document.getElementById('preview-header');
+        headerRow.innerHTML = '<tr>' + preview.columns.map(col => `<th>${col}</th>`).join('') + '</tr>';
+
+        const bodyRows = document.getElementById('preview-body');
+        bodyRows.innerHTML = preview.data.slice(0, 10).map(row => 
+            '<tr>' + row.map((val, idx) => {
+                const val_str = val === null ? '<em>null</em>' : String(val).substring(0, 50);
+                return `<td>${val_str}</td>`;
+            }).join('') + '</tr>'
+        ).join('');
+    }
+
+    function populateStatistics(data) {
+        if (!data.summary_stats && !data.categorical_summary) {
+            console.error('Invalid statistics data:', data);
+            return;
+        }
+
+        const table = document.getElementById('stats-table');
+        table.innerHTML = '';
+
+        for (const [col, stats] of Object.entries(data.summary_stats || {})) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><strong>${col}</strong></td>
+                <td>${stats.mean.toFixed(4)}</td>
+                <td>${stats.std.toFixed(4)}</td>
+                <td>${stats.min.toFixed(4)}</td>
+                <td>${stats.q25.toFixed(4)}</td>
+                <td>${stats.median.toFixed(4)}</td>
+                <td>${stats.q75.toFixed(4)}</td>
+                <td>${stats.max.toFixed(4)}</td>
+            `;
+            table.appendChild(row);
+        }
+
+        // Populate categorical summary
+        const catDiv = document.getElementById('categorical-summary');
+        catDiv.innerHTML = '';
+
+        for (const [col, info] of Object.entries(data.categorical_summary || {})) {
+            const div = document.createElement('div');
+            div.className = 'categorical-feature';
+            const maxCount = Math.max(...Object.values(info.top_values || {}));
+            div.innerHTML = `
+                <h4>${col}</h4>
+                <p>Unique values: ${info.unique_count}</p>
+                <div class="value-counts">
+                    ${Object.entries(info.top_values || {}).map(([val, count]) => `
+                        <div class="value-item">
+                            <span>${val}</span>
+                            <div class="count-bar">
+                                <div style="width: ${(count / maxCount) * 100}%"></div>
+                            </div>
+                            <span>${count}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            catDiv.appendChild(div);
+        }
+
+        // Correlation matrix
+        if (data.correlation_matrix && data.correlation_matrix.columns && data.correlation_matrix.data) {
+            const corrDiv = document.getElementById('correlation-matrix');
+            corrDiv.innerHTML = generateHeatmap(data.correlation_matrix);
+        }
+    }
+
+    function populateInsights(data) {
+        // Outliers
+        const outliersList = document.getElementById('outliers-list');
+        if (Object.keys(data.insights.outliers).length > 0) {
+            outliersList.innerHTML = Object.entries(data.insights.outliers).map(([col, info]) => `
+                <div class="insight-card">
+                    <h4>${col}</h4>
+                    <p>${info.count} outliers (${info.percentage.toFixed(2)}%)</p>
+                    <small>Range: ${info.lower_bound.toFixed(2)} to ${info.upper_bound.toFixed(2)}</small>
+                </div>
+            `).join('');
+        }
+
+        // Skewness
+        const skewnessList = document.getElementById('skewness-list');
+        if (Object.keys(data.insights.skewness).length > 0) {
+            skewnessList.innerHTML = Object.entries(data.insights.skewness).map(([col, info]) => `
+                <div class="insight-card">
+                    <h4>${col}</h4>
+                    <p>Skewness: ${info.skewness.toFixed(2)} (${info.severity})</p>
+                    <small>${info.direction} skew</small>
+                </div>
+            `).join('');
+        }
+
+        // Strong correlations
+        const corrList = document.getElementById('correlations-list');
+        if (data.insights.strong_correlations && data.insights.strong_correlations.length > 0) {
+            corrList.innerHTML = data.insights.strong_correlations.map(corr => `
+                <div class="insight-card">
+                    <h4>${corr.feature_1} ↔ ${corr.feature_2}</h4>
+                    <p>Correlation: ${corr.correlation.toFixed(2)} (${corr.relationship})</p>
+                </div>
+            `).join('');
+        }
+
+        // Constant features
+        const constantList = document.getElementById('constant-list');
+        if (Object.keys(data.insights.constant_features).length > 0) {
+            constantList.innerHTML = Object.entries(data.insights.constant_features).map(([col, info]) => `
+                <div class="insight-card">
+                    <h4>${col}</h4>
+                    <p>${info.type}: ${info.unique_values} unique value(s)</p>
+                </div>
+            `).join('');
+        }
+    }
+
+    function populateRecommendations(data) {
+        const recDiv = document.getElementById('recommendations-list');
+        if (data.recommendations && data.recommendations.length > 0) {
+            recDiv.innerHTML = data.recommendations.map(rec => `
+                <div class="recommendation-card priority-${rec.priority}">
+                    <div class="rec-header">
+                        <h4>${rec.feature}</h4>
+                        <span class="priority-badge">${rec.priority.toUpperCase()}</span>
+                    </div>
+                    <p class="issue"><strong>Issue:</strong> ${rec.issue}</p>
+                    <p class="recommendation"><strong>Recommendation:</strong> ${rec.recommendation}</p>
+                    <p class="reason"><strong>Reason:</strong> ${rec.reason}</p>
+                </div>
+            `).join('');
+        } else {
+            recDiv.innerHTML = '<p class="muted-copy">No recommendations at this time.</p>';
+        }
+    }
+
+    function populatePlotSuggestions(data) {
+        if (!data.suggestions) {
+            console.error('Invalid suggestions data:', data);
+            return;
+        }
+
+        // Create suggestion buttons
+        const univDiv = document.getElementById('univariate-suggestions');
+        const bivDiv = document.getElementById('bivariate-suggestions');
+        const multiDiv = document.getElementById('multivariate-suggestions');
+
+        if (data.suggestions.univariate && data.suggestions.univariate.length > 0) {
+            univDiv.innerHTML = '<h4>Univariate Plots</h4>' + 
+                data.suggestions.univariate.slice(0, 6).map(s => {
+                    const x = (s.x || '').replace(/'/g, "\\'");
+                    const y = (s.y || '').replace(/'/g, "\\'");
+                    return `<button class="suggestion-btn" onclick="quickPlot('${s.plot_type}', '${x}', '${y}')">${s.name}</button>`;
+                }).join('');
+        }
+
+        if (data.suggestions.bivariate && data.suggestions.bivariate.length > 0) {
+            bivDiv.innerHTML = '<h4>Bivariate Plots</h4>' +
+                data.suggestions.bivariate.slice(0, 6).map(s => {
+                    const x = (s.x || '').replace(/'/g, "\\'");
+                    const y = (s.y || '').replace(/'/g, "\\'");
+                    return `<button class="suggestion-btn" onclick="quickPlot('${s.plot_type}', '${x}', '${y}')">${s.name}</button>`;
+                }).join('');
+        }
+
+        if (data.suggestions.multivariate && data.suggestions.multivariate.length > 0) {
+            multiDiv.innerHTML = '<h4>Multivariate Plots</h4>' +
+                data.suggestions.multivariate.slice(0, 3).map(s => {
+                    const x = (s.x || '').replace(/'/g, "\\'");
+                    const y = (s.y || '').replace(/'/g, "\\'");
+                    return `<button class="suggestion-btn" onclick="quickPlot('${s.plot_type}', '${x}', '${y}')">${s.name}</button>`;
+                }).join('');
+        }
+    }
+
+    function populateColumnSelectors(data) {
+        const columns = data.columns;
+        const numericCols = data.numeric || [];
+        
+        const xSelect = document.getElementById('plot-x');
+        const ySelect = document.getElementById('plot-y');
+        const groupSelect = document.getElementById('plot-group');
+
+        console.log('Populating columns:', columns);
+        console.log('Numeric columns:', numericCols);
+
+        if (!columns || columns.length === 0) {
+            console.error('No columns available');
+            return;
+        }
+
+        // Add options for each column
+        const optionsHtml = columns.map(col => `<option value="${col}">${col}</option>`).join('');
+        
+        xSelect.innerHTML += optionsHtml;
+        ySelect.innerHTML += optionsHtml;
+        groupSelect.innerHTML += optionsHtml;
+
+        // Set first column as default for x-axis
+        if (columns.length > 0) {
+            xSelect.value = columns[0];
+            console.log('Set default x-axis to:', columns[0]);
+        }
+
+        // Set second column as default for y-axis if available
+        if (columns.length > 1) {
+            ySelect.value = columns[1];
+        }
+
+        // Populate heatmap feature list with numeric columns
+        if (numericCols && numericCols.length > 0) {
+            const heatmapDiv = document.getElementById('heatmap-features');
+            heatmapDiv.innerHTML = numericCols.map(col => `
+                <label style="display: flex; align-items: center; margin: 8px 0; cursor: pointer;">
+                    <input type="checkbox" value="${col}" class="heatmap-feature-checkbox" checked>
+                    <span style="margin-left: 8px; font-size: 14px;">${col}</span>
+                </label>
+            `).join('');
+            
+            // Store numeric columns for later use
+            window.numericColumns = numericCols;
+        }
+    }
+
+    // Plot builder event listeners
+    document.getElementById('plot-type').addEventListener('change', function() {
+        const type = this.value;
+        document.getElementById('plot-y-group').style.display = ['scatter', 'boxplot'].includes(type) ? 'block' : 'none';
+        document.getElementById('plot-group-group').style.display = ['scatter', 'boxplot', 'bar'].includes(type) ? 'block' : 'none';
+        document.getElementById('heatmap-features-group').style.display = type === 'heatmap' ? 'block' : 'none';
+        
+        // Show/hide x-axis group based on plot type
+        document.getElementById('plot-x').parentElement.style.display = type === 'heatmap' ? 'none' : 'block';
+    });
+
+    document.getElementById('generate-plot-btn').addEventListener('click', async function() {
+        const type = document.getElementById('plot-type').value;
+        const x = document.getElementById('plot-x').value;
+        const y = document.getElementById('plot-y').value || null;
+        const group = document.getElementById('plot-group').value || null;
+
+        // Validation
+        if (!type) {
+            alert('Please select a plot type');
+            return;
+        }
+        
+        // For heatmap, get selected features
+        if (type === 'heatmap') {
+            const selectedFeatures = Array.from(document.querySelectorAll('.heatmap-feature-checkbox:checked'))
+                .map(cb => cb.value);
+            
+            if (selectedFeatures.length < 2) {
+                alert('Please select at least 2 features for heatmap');
+                return;
+            }
+            
+            await generatePlot(type, null, null, null, selectedFeatures);
+        } else {
+            // For other plots
+            if (!x || x === '') {
+                alert('Please select an X-axis feature');
+                return;
+            }
+            await generatePlot(type, x, y === '' ? null : y, group === '' ? null : group);
+        }
+    });
+
+    async function quickPlot(type, x, y) {
+        // Validate parameters
+        if (!type || !x) {
+            console.error('Invalid plot parameters:', {type, x, y});
+            return;
+        }
+
+        document.getElementById('plot-type').value = type;
+        if (y && y !== '') {
+            document.getElementById('plot-y').value = y;
+        }
+        await generatePlot(type, x, y && y !== '' ? y : null, null);
+    }
+
+    async function generatePlot(type, x, y, group, features) {
+        try {
+            // Validate parameters
+            if (!type) {
+                throw new Error('Plot type is required');
+            }
+
+            // Build query parameters based on plot type
+            let url = `/api/eda/plot?plot_type=${encodeURIComponent(type)}`;
+            
+            if (type === 'heatmap') {
+                // For heatmap, include selected features
+                if (features && features.length > 0) {
+                    features.forEach(f => {
+                        url += `&features=${encodeURIComponent(f)}`;
+                    });
+                }
+            } else {
+                // For other plots
+                if (!x) {
+                    throw new Error('X-axis feature is required');
+                }
+                url += `&x=${encodeURIComponent(x)}`;
+                if (y) url += `&y=${encodeURIComponent(y)}`;
+                if (group) url += `&group=${encodeURIComponent(group)}`;
+            }
+
+            console.log('🎨 Generating plot with URL:', url);
+            console.log('Parameters:', {type, x, y, group, features});
+
+            document.getElementById('plot-output').style.display = 'block';
+            document.getElementById('plot-container').innerHTML = '<div style="display:flex; align-items:center; justify-content:center; height:100%; color:var(--text-muted);"><p>⏳ Generating plot...</p></div>';
+
+            const resp = await fetch(url);
+            const responseText = await resp.text();
+            
+            if (!resp.ok) {
+                console.error('❌ API Error Response:', responseText);
+                let errorMsg = `HTTP error! status: ${resp.status}`;
+                try {
+                    const errorData = JSON.parse(responseText);
+                    errorMsg = errorData.detail || errorMsg;
+                } catch (e) {
+                    // Response wasn't JSON
+                }
+                throw new Error(errorMsg);
+            }
+            
+            // Parse the response
+            let plotData;
+            try {
+                plotData = JSON.parse(responseText);
+            } catch (e) {
+                console.error('❌ JSON Parse Error:', e);
+                console.error('Response was:', responseText.substring(0, 500));
+                throw new Error('Invalid JSON response from server');
+            }
+            
+            console.log('✅ Plot data received successfully');
+            console.log('Plot data structure:', {
+                hasTitle: !!plotData.title,
+                hasData: !!plotData.data,
+                dataLength: Array.isArray(plotData.data) ? plotData.data.length : 'not array',
+                hasLayout: !!plotData.layout,
+                plotType: plotData.plot_type
+            });
+
+            // Update title
+            document.getElementById('plot-title').textContent = plotData.title || 'Plot';
+            
+            // Clear previous plot
+            document.getElementById('plot-container').innerHTML = '';
+            
+            // Validate and prepare data
+            let data = plotData.data;
+            if (!Array.isArray(data)) {
+                if (typeof data === 'object' && data !== null) {
+                    data = [data];
+                    console.warn('⚠️ Data was not an array, wrapped it');
+                } else {
+                    throw new Error('Invalid data format: data must be array or object');
+                }
+            }
+            
+            // Validate each trace has required properties
+            data = data.map((trace, idx) => {
+                if (!trace.type) {
+                    console.warn(`⚠️ Trace ${idx} missing 'type', inferring...`);
+                    // Try to infer type from data structure
+                    if (trace.z && Array.isArray(trace.z)) {
+                        trace.type = 'heatmap';
+                    } else if (trace.y && Array.isArray(trace.y)) {
+                        trace.type = 'box';
+                    } else if (trace.mode === 'markers') {
+                        trace.type = 'scatter';
+                    } else {
+                        trace.type = 'bar';
+                    }
+                }
+                return trace;
+            });
+            
+            let layout = plotData.layout || {};
+            if (typeof layout !== 'object') {
+                layout = {};
+            }
+            
+            // Ensure responsive sizing
+            layout.autosize = true;
+            layout.height = 600;
+            layout.margin = layout.margin || { l: 50, r: 50, t: 80, b: 50 };
+            
+            console.log('📊 Rendering with:');
+            console.log('- Traces:', data.length);
+            console.log('- Layout title:', layout.title);
+            
+            // Render plot using Plotly
+            if (typeof Plotly === 'undefined') {
+                throw new Error('Plotly.js library not loaded');
+            }
+            
+            Plotly.newPlot('plot-container', data, layout, {
+                responsive: true,
+                displayModeBar: true,
+                displaylogo: false
+            });
+            
+            console.log('✨ Plot rendered successfully!');
+            
+        } catch (error) {
+            console.error('❌ Error generating plot:', error);
+            const container = document.getElementById('plot-container');
+            container.innerHTML = `
+                <div style="color: red; padding: 20px; overflow: auto; max-height: 600px;">
+                    <strong>Error Generating Plot:</strong>
+                    <p style="margin-top: 10px; font-size: 14px; white-space: pre-wrap; word-break: break-word;">
+                        ${error.message}
+                    </p>
+                    <p style="margin-top: 10px; font-size: 12px; color: #666;">
+                        Please check the browser console (F12) for more details.
+                    </p>
+                </div>
+            `;
+        }
+    }
+
+    function generateHeatmap(corrData) {
+        const cols = corrData.columns;
+        const data = corrData.data;
+
+        let html = '<div class="heatmap"><table><tr><th></th>';
+        cols.forEach(col => html += `<th>${col}</th>`);
+        html += '</tr>';
+
+        data.forEach((row, i) => {
+            html += `<tr><th>${cols[i]}</th>`;
+            row.forEach(val => {
+                const color = val > 0 ? `rgba(16, 185, 129, ${Math.abs(val)})` : `rgba(239, 68, 68, ${Math.abs(val)})`;
+                html += `<td style="background: ${color}">${val.toFixed(2)}</td>`;
+            });
+            html += '</tr>';
+        });
+
+        html += '</table></div>';
+        return html;
+    }
+</script>
+{% endblock %}

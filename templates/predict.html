@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero-card">
+    <div class="hero-copy">
+        <span class="eyebrow">Predictions</span>
+        <h1>Get instant predictions</h1>
+        <p>
+            Use the latest production model to generate predictions. Enter feature values and get results
+            with confidence scores and model metadata instantly.
+        </p>
+    </div>
+    <div class="hero-panel">
+        <div class="stat-pill">
+            <span class="summary-label">Model Status</span>
+            <strong id="model-status">Loading...</strong>
+        </div>
+        <div class="stat-pill">
+            <span class="summary-label">Model Version</span>
+            <strong id="model-version">-</strong>
+        </div>
+    </div>
+</section>
+
+<section class="studio-grid">
+    <!-- Prediction Form -->
+    <div class="studio-card">
+        <div class="section-head">
+            <h2>Make a Prediction</h2>
+            <p>Enter feature values to get a prediction from the production model.</p>
+        </div>
+
+        <div id="schema-loading" class="empty-state">
+            <p>Loading feature schema...</p>
+        </div>
+
+        <form id="predict-form" class="predict-form hidden">
+            <div id="feature-fields" class="parameter-grid"></div>
+            
+            <button type="submit" class="primary-button" id="predict-button">Get Prediction</button>
+        </form>
+
+        <div id="predict-error" class="alert error hidden"></div>
+    </div>
+
+    <!-- Results Panel -->
+    <div class="studio-card">
+        <div class="section-head">
+            <h2>Results</h2>
+            <p>Prediction results and model information will appear here.</p>
+        </div>
+
+        <div id="results-empty" class="empty-state">
+            <p>Make a prediction to see results here.</p>
+        </div>
+
+        <div id="results-panel" class="results-panel hidden">
+            <div class="result-section">
+                <h3>Prediction Value</h3>
+                <div class="result-value" id="result-prediction">-</div>
+            </div>
+
+            <div class="result-section">
+                <h3>Confidence Score</h3>
+                <div class="result-confidence">
+                    <div id="result-confidence-bar" class="confidence-bar">
+                        <div id="result-confidence-fill" class="confidence-fill"></div>
+                    </div>
+                    <span id="result-confidence-text">0%</span>
+                </div>
+            </div>
+
+            <div class="result-grid">
+                <div class="result-item">
+                    <span class="result-label">Model Name</span>
+                    <span id="result-model-name" class="result-value-small">-</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Model Version</span>
+                    <span id="result-model-version" class="result-value-small">-</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Task Type</span>
+                    <span id="result-task-type" class="result-value-small">-</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Timestamp</span>
+                    <span id="result-timestamp" class="result-value-small">-</span>
+                </div>
+            </div>
+
+            <button type="button" id="copy-result" class="secondary-button">Copy Result as JSON</button>
+        </div>
+    </div>
+</section>
+
+<!-- Prediction History Section -->
+<section class="history-section">
+    <div class="studio-card">
+        <div class="section-head">
+            <h2>Recent Predictions</h2>
+            <p>Your recent predictions will be tracked here.</p>
+        </div>
+
+        <div id="history-empty" class="empty-state">
+            <p>No predictions made yet.</p>
+        </div>
+
+        <div id="history-panel" class="history-panel hidden">
+            <div id="history-list" class="history-list"></div>
+            <button type="button" id="clear-history" class="secondary-button">Clear History</button>
+        </div>
+    </div>
+</section>
+
+<script src="{{ url_for('static', path='/predict.js') }}"></script>
+{% endblock %}
